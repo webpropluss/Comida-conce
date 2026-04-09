@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ComidaConce">
+<meta name="theme-color" content="#2d6a4f">
+<title>ComidaConce — Concepción, Bolivia</title>
+<link rel="manifest" id="pwa-manifest">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --verde:#2d6a4f;--verde-claro:#52b788;--verde-bg:#d8f3dc;--verde-oscuro:#1b4332;
+  --naranja:#e76f51;--naranja-bg:#fce4d6;--naranja-oscuro:#c1440e;
+  --amarillo:#f4a261;--crema:#fdf8f0;--texto:#1a1a1a;--texto-gris:#6b7280;
+  --borde:#e5e7eb;--blanco:#fff;--sombra:0 2px 12px rgba(0,0,0,.08);
+  --radio:14px;--radio-lg:18px;--max:860px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--crema);color:var(--texto);min-height:100vh}
+.hidden{display:none!important}
+
+/* ── NAV CLIENTE ── */
+nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(27,67,50,.3)}
+.nav-inner{max-width:var(--max);margin:0 auto;padding:0 1.25rem;height:60px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nav-logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0}
+.nav-logo span{color:var(--amarillo)}
+.nav-btns{display:flex;gap:6px}
+.btn-nav{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 13px;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;white-space:nowrap}
+.btn-nav:hover{background:rgba(255,255,255,.22)}
+.btn-nav.amarillo{background:var(--amarillo);color:var(--verde-oscuro);border-color:var(--amarillo);font-weight:700}
+.btn-nav.amarillo:hover{background:#e8931a}
+.mobile-toggle{display:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);color:#fff;width:36px;height:36px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem}
+.mobile-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500}
+.mobile-panel.open{display:flex;flex-direction:column;align-items:flex-start}
+.mobile-panel-inner{background:var(--verde-oscuro);padding:1.4rem;display:flex;flex-direction:column;gap:10px;width:210px;min-height:100vh;justify-content:flex-start}
+.mobile-panel-inner .btn-nav{display:block;text-align:left;padding:10px 14px;font-size:.88rem}
+.mobile-close{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;margin-bottom:.5rem}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(140deg,var(--verde-oscuro),var(--verde) 55%,#40916c);color:#fff;padding:2.5rem 1.25rem 2rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;background:rgba(255,255,255,.03);border-radius:50%}
+.hero-badge{display:inline-block;background:rgba(244,162,97,.2);border:1px solid rgba(244,162,97,.4);color:var(--amarillo);font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:16px;margin-bottom:.8rem}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(1.7rem,5vw,2.8rem);font-weight:900;line-height:1.1;margin-bottom:.4rem}
+.hero h1 span{color:var(--amarillo)}
+.hero p{color:rgba(255,255,255,.75);font-size:.95rem;margin-bottom:1.4rem}
+.search-box{display:flex;gap:8px;max-width:400px;margin:0 auto}
+.search-box input{flex:1;padding:10px 16px;border-radius:24px;border:none;font-size:.88rem;font-family:inherit;outline:none;min-width:0}
+.btn-buscar{background:var(--naranja);color:#fff;border:none;padding:10px 18px;border-radius:24px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.85rem;transition:background .2s}
+.btn-buscar:hover{background:var(--naranja-oscuro)}
+
+/* ── STATS ── */
+.stats-bar{background:var(--verde-oscuro);padding:.7rem 1.25rem;display:flex;justify-content:center;gap:1.5rem}
+.stat-item{text-align:center}
+.stat-num{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:900;color:var(--amarillo);line-height:1}
+.stat-lbl{font-size:.65rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px}
+
+/* ── CHIPS ── */
+.chips-wrap{background:var(--blanco);border-bottom:1px solid var(--borde);padding:0 1.25rem}
+.chips{display:flex;gap:7px;padding:.8rem 0;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 13px;border-radius:18px;border:1.5px solid var(--borde);background:#fff;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit}
+.chip:hover,.chip.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+.chip.r:hover,.chip.r.active{background:var(--naranja);border-color:var(--naranja)}
+
+/* ── GRID ── */
+.sec-row{padding:1.1rem 1.25rem .4rem;display:flex;align-items:center;justify-content:space-between;max-width:var(--max);margin:0 auto}
+.sec-row h2{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;color:var(--verde)}
+.sec-count{font-size:.78rem;color:var(--texto-gris);font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;padding:.3rem 1.25rem 6rem;max-width:var(--max);margin:0 auto}
+
+/* ── CARD ── */
+.neg-card{background:var(--blanco);border-radius:var(--radio-lg);box-shadow:var(--sombra);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;border:1.5px solid transparent}
+.neg-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.13)}
+.neg-card.rapida{border-color:#fde68a}
+.neg-card.almuerzo{border-color:#b7e4c7}
+.neg-card.postres{border-color:#fbcfe8}
+.card-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative}
+.card-img.rb{background:linear-gradient(135deg,#fffbea,#fef3c7)}
+.card-img.pb{background:linear-gradient(135deg,#fff0f6,#fce7f3)}
+.card-img.ab{background:linear-gradient(135deg,#f0fdf4,#d8f3dc)}
+.card-badges{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.cbadge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:9px;text-transform:uppercase}
+.cb-r{background:#d97706;color:#fff}
+.cb-a{background:var(--verde);color:#fff}
+.cb-p{background:var(--amarillo);color:#7a4800}
+.cb-c{background:rgba(0,0,0,.6);color:#fff}
+.cb-new{background:#8b5cf6;color:#fff}
+.cb-pos{background:#db2777;color:#fff}
+.card-body{padding:11px 13px}
+.card-nombre{font-weight:700;font-size:.95rem;margin-bottom:1px}
+.card-desc{font-size:.77rem;color:var(--texto-gris);margin-bottom:7px;line-height:1.4}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px}
+.tag{font-size:.68rem;padding:2px 7px;border-radius:8px;background:var(--crema);color:var(--texto-gris);border:1px solid var(--borde)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;font-size:.74rem;color:var(--texto-gris)}
+.abierto{font-weight:700;color:var(--verde-claro)}
+.cerrado{font-weight:700;color:#ef4444}
+
+/* ── BACK BAR ── */
+.back-bar{background:var(--crema);padding:10px 1.25rem;max-width:var(--max);margin:0 auto}
+.back-btn{background:none;border:none;color:var(--verde);font-weight:700;cursor:pointer;font-family:inherit;font-size:.88rem}
+
+/* ── NEGOCIO DETALLE ── */
+.neg-header-bg{background:linear-gradient(135deg,var(--verde-oscuro),var(--verde));color:#fff;padding:1.25rem}
+.neg-header-inner{max-width:var(--max);margin:0 auto;display:flex;align-items:flex-start;gap:14px}
+.neg-logo{font-size:2.5rem;background:rgba(255,255,255,.14);border-radius:14px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.neg-info h2{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:900}
+.neg-info p{color:rgba(255,255,255,.75);font-size:.82rem;margin-top:2px}
+.neg-sub{font-size:.77rem;color:rgba(255,255,255,.6);margin-top:2px}
+.neg-badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.neg-body{padding:1rem 1.25rem 6rem;max-width:var(--max);margin:0 auto}
+
+/* ── MENÚ RÁPIDA ── */
+.menu-cat{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--verde);margin:1rem 0 .4rem;border-left:3px solid var(--verde);padding-left:8px}
+.menu-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--borde)}
+.menu-item:last-child{border-bottom:none}
+.mi-l{display:flex;gap:9px;align-items:center}
+.mi-foto{width:46px;height:46px;border-radius:9px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.mi-nombre{font-size:.88rem;font-weight:600}
+.mi-desc{font-size:.75rem;color:var(--texto-gris)}
+.mi-r{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.precio{font-weight:700;font-size:.92rem;color:var(--verde)}
+.btn-agregar-item{background:var(--verde);color:#fff;border:none;border-radius:16px;padding:4px 11px;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .2s;font-family:inherit}
+.btn-agregar-item:hover{background:var(--verde-claro)}
+
+/* ── ALMUERZO ── */
+.dia-label{display:inline-flex;align-items:center;gap:6px;background:var(--naranja-bg);color:var(--naranja-oscuro);font-size:.73rem;font-weight:700;padding:4px 10px;border-radius:9px;margin-bottom:10px}
+.alm-sec{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--verde);opacity:.7;margin:12px 0 5px}
+.alm-card{background:var(--blanco);border:1.5px solid var(--borde);border-radius:var(--radio);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .2s,box-shadow .2s}
+.alm-card.sel-opt{cursor:pointer}
+.alm-card.sel-opt:hover{border-color:var(--verde-claro)}
+.alm-card.selected{border-color:var(--verde);box-shadow:0 0 0 3px rgba(45,106,79,.1)}
+.alm-radio{width:19px;height:19px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.alm-card.selected .alm-radio{border-color:var(--verde);background:var(--verde)}
+.radio-dot{width:7px;height:7px;border-radius:50%;background:#fff;display:none}
+.alm-card.selected .radio-dot{display:block}
+.alm-emoji{font-size:1.5rem;flex-shrink:0}
+.alm-text{flex:1;min-width:0}
+.alm-nombre{font-size:.88rem;font-weight:600}
+.alm-sub-text{font-size:.74rem;color:var(--texto-gris);margin-top:1px}
+.alm-precio-tag{font-size:.8rem;font-weight:700;color:var(--verde);background:var(--verde-bg);padding:3px 9px;border-radius:9px;white-space:nowrap;flex-shrink:0}
+.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.pack-card{border:2px solid var(--borde);border-radius:var(--radio);padding:12px 14px;cursor:pointer;transition:all .2s;position:relative}
+.pack-card:hover{border-color:var(--verde-claro)}
+.pack-card.active{border-color:var(--verde);background:var(--verde-bg)}
+.pack-title{font-weight:700;font-size:.88rem;margin-bottom:2px}
+.pack-desc{font-size:.74rem;color:var(--texto-gris);line-height:1.4}
+.pack-price{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:900;color:var(--verde);margin-top:5px}
+.pack-check{position:absolute;top:8px;right:10px;width:18px;height:18px;border-radius:50%;background:var(--verde);display:none;align-items:center;justify-content:center}
+.pack-card.active .pack-check{display:flex}
+.pack-check::after{content:'✓';color:#fff;font-size:.7rem;font-weight:700}
+.sep{border:none;border-top:1px solid var(--borde);margin:14px 0}
+.alm-footer{background:var(--verde-bg);border-radius:var(--radio);padding:13px 14px;margin-top:12px}
+.alm-footer-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.alm-precio-lbl{font-size:.8rem;color:var(--verde);opacity:.75}
+.alm-precio-val{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:900;color:var(--verde)}
+.btn-agregar-alm{background:var(--verde);color:#fff;border:none;border-radius:22px;padding:10px 20px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;white-space:nowrap}
+.btn-agregar-alm:hover{background:var(--verde-claro)}
+.alm-resumen{font-size:.78rem;color:var(--verde);margin-top:7px;opacity:.85}
+.alm-hint{font-size:.77rem;color:var(--naranja-oscuro);background:var(--naranja-bg);border-radius:8px;padding:5px 10px;margin-top:6px;display:none}
+.alm-hint.show{display:block}
+.qty-ctrl{display:flex;align-items:center;gap:7px}
+.qty-btn{width:27px;height:27px;border-radius:50%;border:1.5px solid var(--borde);background:#fff;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.qty-btn:hover{border-color:var(--verde);color:var(--verde)}
+.qty-num{font-size:.9rem;font-weight:700;min-width:16px;text-align:center}
+
+/* ── CONTACTO ── */
+.wsp-box{background:var(--blanco);border:1.5px solid var(--borde);border-radius:var(--radio);padding:12px 14px;margin-top:14px}
+.wsp-box-title{font-weight:700;font-size:.86rem;margin-bottom:7px}
+.wsp-link{display:flex;align-items:center;gap:7px;color:#25D366;font-weight:700;font-size:.86rem;text-decoration:none}
+
+/* ── CARRITO ── */
+.carrito-bar{position:fixed;bottom:0;left:0;right:0;background:var(--verde);color:#fff;padding:12px 1.25rem;display:flex;align-items:center;justify-content:space-between;z-index:200;transform:translateY(100%);transition:transform .3s;box-shadow:0 -3px 16px rgba(0,0,0,.2)}
+.carrito-bar.show{transform:translateY(0)}
+.c-info strong{font-size:.98rem;margin-right:6px}
+.c-info span{font-size:.82rem;opacity:.85}
+.btn-ver-pedido{background:var(--amarillo);color:var(--verde-oscuro);border:none;padding:9px 18px;border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.88rem}
+
+/* ── MODAL CARRITO ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--blanco);border-radius:20px 20px 0 0;padding:1.4rem;width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+.modal h3{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;margin-bottom:1rem}
+.modal-item{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--borde);gap:8px}
+.modal-item:last-of-type{border-bottom:none}
+.modal-item-name{font-weight:600;font-size:.87rem}
+.modal-item-neg{font-size:.74rem;color:var(--texto-gris)}
+.m-qty{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.m-qty-btn{width:25px;height:25px;border-radius:50%;border:1.5px solid var(--borde);background:#fff;cursor:pointer;font-size:.95rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.m-precio{font-weight:700;color:var(--verde);min-width:48px;text-align:right;font-size:.88rem}
+.hora-sel{width:100%;margin:1rem 0;padding:9px 12px;border-radius:10px;border:1.5px solid var(--borde);font-family:inherit;font-size:.88rem}
+.modal-total{font-size:1.05rem;font-weight:700;text-align:right;padding:7px 0;color:var(--verde)}
+.btn-wsp{width:100%;background:#25D366;color:#fff;border:none;padding:13px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:.4rem}
+.btn-wsp:hover{background:#1aab53}
+.btn-cancel{width:100%;background:none;border:none;padding:9px;color:var(--texto-gris);cursor:pointer;font-family:inherit;font-size:.82rem;margin-top:4px}
+
+/* ── REGISTRO NEGOCIO ── */
+.form-wrap{padding:1.25rem;max-width:500px;margin:0 auto}
+.form-wrap h2{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:900;color:var(--verde);margin-bottom:.25rem}
+.form-sub{color:var(--texto-gris);font-size:.87rem;margin-bottom:1.2rem}
+.banner-prueba{background:var(--verde-bg);border:1.5px solid var(--verde-claro);border-radius:11px;padding:11px 13px;margin-bottom:1.1rem;font-size:.83rem;color:var(--verde)}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:1.1rem}
+.plan-card{border:2px solid var(--borde);border-radius:13px;padding:13px;cursor:pointer;transition:all .2s}
+.plan-card.sel{border-color:var(--verde);background:var(--verde-bg)}
+.plan-card h4{font-weight:700;font-size:.87rem;margin-bottom:2px}
+.plan-card p{font-size:.74rem;color:var(--texto-gris)}
+.plan-precio{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:900;color:var(--verde);margin-top:5px}
+.fg{margin-bottom:.9rem}
+.fg label{display:block;font-size:.82rem;font-weight:600;margin-bottom:3px}
+.fg input,.fg textarea,.fg select{width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:.87rem;outline:none;transition:border .2s;background:#fff;color:var(--texto)}
+.fg input:focus,.fg textarea:focus{border-color:var(--verde)}
+.fg textarea{resize:vertical;min-height:75px}
+.btn-primary{width:100%;background:var(--verde);color:#fff;border:none;padding:13px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.4rem}
+.btn-primary:hover{background:var(--verde-oscuro)}
+.form-note{font-size:.73rem;color:var(--texto-gris);text-align:center;margin-top:9px}
+
+/* ── SUBIR MENÚ ── */
+.menudia-wrap{padding:1.25rem;max-width:520px;margin:0 auto}
+.menudia-wrap h2{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;color:var(--verde);margin-bottom:.25rem}
+.menudia-sub{color:var(--texto-gris);font-size:.85rem;margin-bottom:1.1rem}
+.wsp-opt{background:var(--verde-bg);border:1.5px solid var(--verde-claro);border-radius:11px;padding:13px;margin-bottom:1rem;font-size:.82rem;color:var(--verde)}
+.wsp-opt a{color:var(--verde);font-weight:700}
+.bloque{background:var(--crema);border:1.5px solid var(--borde);border-radius:12px;padding:13px;margin-bottom:.9rem}
+.bloque-title{font-size:.8rem;font-weight:700;color:var(--verde);margin-bottom:9px}
+.pb-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pb-field label{font-size:.78rem;font-weight:600;display:block;margin-bottom:3px}
+.pb-field input{width:100%;padding:8px 11px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:.87rem;outline:none}
+.pb-field input:focus{border-color:var(--verde)}
+.sf-row{display:flex;gap:7px;align-items:center;margin-bottom:6px}
+.sf-emoji{width:42px;padding:8px 5px;text-align:center;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.87rem;outline:none}
+.sf-input{flex:1;padding:8px 11px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.87rem;outline:none}
+.sf-input:focus,.sf-emoji:focus{border-color:var(--verde)}
+.btn-add-seg{background:none;border:1.5px dashed var(--verde-claro);color:var(--verde);border-radius:8px;padding:6px 12px;font-size:.79rem;font-weight:600;cursor:pointer;font-family:inherit;width:100%;margin-top:3px}
+.btn-add-seg:hover{background:var(--verde-bg)}
+.btn-naranja{width:100%;background:var(--naranja);color:#fff;border:none;padding:13px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.4rem}
+.btn-naranja:hover{background:var(--naranja-oscuro)}
+
+/* ── PANEL ADMIN ── */
+.admin-nav{background:var(--verde-oscuro);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-nav-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:900}
+.admin-nav-title span{color:var(--amarillo);font-size:.75rem;font-weight:600;margin-left:8px;background:rgba(244,162,97,.2);padding:2px 8px;border-radius:10px}
+.admin-wrap{padding:1.25rem;max-width:var(--max);margin:0 auto}
+.admin-wrap h2{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:900;color:var(--verde);margin-bottom:1rem}
+.notif-bar{background:var(--naranja-bg);border:1.5px solid var(--naranja);border-radius:11px;padding:9px 13px;margin-bottom:1rem;font-size:.81rem;color:var(--naranja-oscuro);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-notif{background:var(--naranja);color:#fff;border:none;padding:5px 11px;border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;font-family:inherit}
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:1.3rem}
+.astat{background:var(--blanco);border-radius:12px;padding:12px;text-align:center;box-shadow:var(--sombra)}
+.astat-num{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:900;color:var(--verde)}
+.astat-lbl{font-size:.65rem;color:var(--texto-gris);font-weight:600;text-transform:uppercase}
+.admin-section-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--verde);margin-bottom:.7rem}
+.admin-table{background:var(--blanco);border-radius:13px;box-shadow:var(--sombra);overflow:hidden;margin-bottom:1.4rem;overflow-x:auto}
+.ath{padding:10px 14px;font-weight:700;font-size:.78rem;color:var(--texto-gris);border-bottom:1px solid var(--borde);display:grid;grid-template-columns:2fr 1fr 1.3fr 1fr;gap:8px;min-width:380px}
+.atr{padding:10px 14px;display:grid;grid-template-columns:2fr 1fr 1.3fr 1fr;gap:8px;align-items:center;border-bottom:1px solid var(--borde);font-size:.8rem;min-width:380px}
+.atr:last-child{border-bottom:none}
+.sbadge{font-size:.68rem;font-weight:700;padding:3px 7px;border-radius:8px}
+.s-act{background:var(--verde-bg);color:var(--verde)}
+.s-pr{background:#fef9c3;color:#713f12}
+.s-venc{background:#fee2e2;color:#991b1b}
+.btn-sm{font-size:.7rem;padding:3px 8px;border-radius:7px;border:1.5px solid;cursor:pointer;font-family:inherit;font-weight:600;background:#fff}
+.btn-sm.verde{border-color:var(--verde);color:var(--verde)}
+.btn-sm.verde:hover{background:var(--verde);color:#fff}
+.btn-sm.rojo{border-color:var(--naranja);color:var(--naranja)}
+.btn-sm.rojo:hover{background:var(--naranja);color:#fff}
+.pend-box{background:var(--blanco);border-radius:13px;box-shadow:var(--sombra);padding:13px;margin-bottom:1.4rem}
+.pend-item{padding:11px 0;border-bottom:1px solid var(--borde)}
+.pend-item:last-child{border-bottom:none}
+.pend-nombre{font-weight:700;font-size:.87rem;margin-bottom:2px}
+.pend-desc{font-size:.8rem;color:var(--texto-gris);margin-bottom:8px;line-height:1.4}
+.pend-btns{display:flex;gap:7px}
+
+/* ── SUCCESS ── */
+.success-box{text-align:center;padding:3rem 1.25rem;max-width:440px;margin:0 auto}
+.success-icon{font-size:3.5rem;margin-bottom:.8rem}
+.success-box h2{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:900;color:var(--verde);margin-bottom:.4rem}
+.success-box p{color:var(--texto-gris);margin-bottom:1.3rem;font-size:.9rem;line-height:1.5}
+.success-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-success{background:var(--verde);color:#fff;border:none;padding:11px 24px;border-radius:20px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .nav-inner{padding:0 1rem}
+  nav .btn-nav:not(.amarillo){display:none}
+  .mobile-toggle{display:flex!important}
+  .hero{padding:2rem 1rem 1.5rem}
+  .search-box{flex-direction:row;gap:7px}
+  .grid{grid-template-columns:1fr 1fr;gap:10px;padding:.3rem 1rem 6rem}
+  .pack-grid{grid-template-columns:1fr}
+  .plan-grid{grid-template-columns:1fr}
+  .admin-stats{grid-template-columns:repeat(2,1fr)}
+  .pb-grid{grid-template-columns:1fr}
+  .ath,.atr{grid-template-columns:2fr 1fr 1fr;font-size:.75rem}
+  .ath span:nth-child(2),.atr span:nth-child(2){display:none}
+}
+@media(max-width:380px){.grid{grid-template-columns:1fr}}
+@media(min-width:601px){.mobile-toggle{display:none!important}.mobile-panel{display:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     VISTA CLIENTE (pantalla principal)
+═══════════════════════════════════════════════ -->
+<div id="app-cliente">
+
+  <nav>
+    <div class="nav-inner">
+      <span class="nav-logo">Comida<span>Conce</span></span>
+      <div class="nav-btns">
+        <button class="btn-nav" onclick="irA('menudia')">📋 Subir Menú</button>
+        <button class="btn-nav amarillo" onclick="irA('registro')">🏪 Mi Negocio</button>
+        <button class="mobile-toggle" onclick="abrirMenuMobile()">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile nav -->
+  <div class="mobile-panel" id="mobile-panel" onclick="cerrarMenuMobile()">
+    <div class="mobile-panel-inner" onclick="event.stopPropagation()">
+      <button class="mobile-close" onclick="cerrarMenuMobile()">✕</button>
+      <button class="btn-nav" onclick="irA('menudia');cerrarMenuMobile()">Subir Menú Hoy</button>
+      <button class="btn-nav amarillo" onclick="irA('registro');cerrarMenuMobile()">Registrar mi Negocio</button>
+      <div style="flex:1"></div>
+      <button class="btn-nav" onclick="cerrarMenuMobile();document.getElementById('admin-login').classList.remove('hidden')" style="opacity:.5;font-size:.75rem;border-color:rgba(255,255,255,.15)">Acceso Admin</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA: INICIO -->
+  <div id="p-inicio">
+    <div class="hero">
+      <div class="hero-badge">📍 Concepción, Santa Cruz — Bolivia</div>
+      <h1>La comida de <span>Concepción</span><br>en un solo lugar</h1>
+      <p>Reservá tu pedido y recogelo listo. Sin filas, sin esperas.</p>
+      <div class="search-box">
+        <input type="text" id="buscador" placeholder="Buscar restaurante o plato..." oninput="filtrarTexto()">
+        <button class="btn-buscar">🔍</button>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num" id="stat-total">6</div><div class="stat-lbl">Negocios</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-abiertos">4</div><div class="stat-lbl">Abiertos ahora</div></div>
+      <div class="stat-item"><div class="stat-num">Bs 15</div><div class="stat-lbl">Desde</div></div>
+    </div>
+    <div class="chips-wrap">
+      <div class="chips">
+        <button class="chip active" onclick="filtrar('todos',this)">🍽️ Todos</button>
+        <button class="chip r" onclick="filtrar('rapida',this)">🍔 Comida Rápida</button>
+        <button class="chip" onclick="filtrar('almuerzo',this)">🥗 Almuerzo del Día</button>
+        <button class="chip" onclick="filtrar('abierto',this)">🟢 Abiertos ahora</button>
+        <button class="chip" onclick="filtrar('premium',this)">⭐ Premium</button>
+        <button class="chip" onclick="filtrar('postres',this)">🍓 Postres & Antojos</button>
+      </div>
+    </div>
+    <div class="sec-row">
+      <h2 id="sec-label">Todos los negocios</h2>
+      <span class="sec-count" id="sec-count"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- PANTALLA: NEGOCIO DETALLE -->
+  <div id="p-negocio" class="hidden">
+    <div style="background:var(--crema)"><div class="back-bar"><button class="back-btn" onclick="irA('inicio')">← Volver al inicio</button></div></div>
+    <div class="neg-header-bg"><div class="neg-header-inner" id="neg-header"></div></div>
+    <div class="neg-body" id="neg-body"></div>
+  </div>
+
+  <!-- PANTALLA: REGISTRO NEGOCIO -->
+  <div id="p-registro" class="hidden">
+    <div style="background:var(--crema)"><div class="back-bar"><button class="back-btn" onclick="irA('inicio')">← Volver</button></div></div>
+    <div class="form-wrap">
+      <h2>Registra tu negocio</h2>
+      <p class="form-sub">Empieza gratis por 1 mes. Sin tarjeta requerida.</p>
+      <div class="banner-prueba">🎉 <strong>1 mes de prueba completamente gratis</strong><br>Después elegís el plan según tu tipo de negocio.</div>
+      <div style="font-weight:700;font-size:.86rem;margin-bottom:7px">Tipo de negocio</div>
+      <div class="plan-grid">
+        <div class="plan-card sel" id="plan-rapida" onclick="selPlan('rapida')" style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
+          <div style="font-size:1.8rem;flex-shrink:0">🍔</div>
+          <div style="flex:1">
+            <h4 style="margin-bottom:2px">Comida Rápida</h4>
+            <p>Pollos, hamburguesas, sándwiches — menú fijo con fotos</p>
+            <div class="plan-precio">Bs 20/mes</div>
+          </div>
+        </div>
+        <div class="plan-card" id="plan-almuerzo" onclick="selPlan('almuerzo')" style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
+          <div style="font-size:1.8rem;flex-shrink:0">🥗</div>
+          <div style="flex:1">
+            <h4 style="margin-bottom:2px">Almuerzo Diario</h4>
+            <p>Sopa, segundo y bebida — actualizá tu menú cada día</p>
+            <div class="plan-precio">Bs 15/mes</div>
+          </div>
+        </div>
+        <div class="plan-card" id="plan-postres" onclick="selPlan('postres')" style="grid-column:1/-1;display:flex;align-items:center;gap:12px">
+          <div style="font-size:1.8rem;flex-shrink:0">🍓</div>
+          <div style="flex:1">
+            <h4 style="margin-bottom:2px">Postres & Antojos</h4>
+            <p>Fresas con crema, jugos, helados, snacks — menú fijo con fotos</p>
+            <div class="plan-precio">Bs 20/mes</div>
+          </div>
+        </div>
+      </div>
+      <div class="fg"><label>Nombre del negocio</label><input id="r-nombre" type="text" placeholder="Ej: Doña Carmen Almuerzo"></div>
+      <div class="fg"><label>Número de WhatsApp</label><input id="r-wsp" type="tel" placeholder="Ej: 76543210"></div>
+      <div class="fg"><label>Dirección en Concepción</label><input id="r-dir" type="text" placeholder="Ej: Av. Bolivia, frente al mercado"></div>
+      <div class="fg">
+        <label>Ubicación del negocio <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label>
+
+        <!-- Estado: sin ubicación -->
+        <div id="ubic-sin" style="display:flex;flex-direction:column;gap:8px">
+          <button type="button" onclick="detectarUbicacion()" style="display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--verde-claro);border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit;width:100%;text-align:left;transition:all .2s">
+            <span style="font-size:1.6rem">📍</span>
+            <div>
+              <div style="font-size:.88rem;font-weight:700;color:var(--verde)">Usar mi ubicación actual</div>
+              <div style="font-size:.74rem;color:var(--texto-gris)">Detecta dónde estás ahora mismo</div>
+            </div>
+          </button>
+          <button type="button" onclick="abrirGoogleMaps()" style="display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--borde);border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit;width:100%;text-align:left;transition:all .2s">
+            <span style="font-size:1.6rem">🗺️</span>
+            <div>
+              <div style="font-size:.88rem;font-weight:700;color:var(--texto)">Abrir Google Maps y elegir</div>
+              <div style="font-size:.74rem;color:var(--texto-gris)">Buscá tu negocio y copiá el link</div>
+            </div>
+          </button>
+          <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
+            <div style="flex:1;height:1px;background:var(--borde)"></div>
+            <span style="font-size:.72rem;color:var(--texto-gris)">o pegá el link de Maps</span>
+            <div style="flex:1;height:1px;background:var(--borde)"></div>
+          </div>
+          <input id="r-maps" type="url" placeholder="https://maps.google.com/..." style="width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:.85rem;outline:none" oninput="onMapsInput(this)">
+        </div>
+
+        <!-- Estado: ubicación detectada -->
+        <div id="ubic-con" style="display:none;background:var(--verde-bg);border:1.5px solid var(--verde-claro);border-radius:12px;padding:12px 14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:1.3rem">✅</span>
+              <div>
+                <div style="font-size:.86rem;font-weight:700;color:var(--verde)">Ubicación guardada</div>
+                <div id="ubic-coords-txt" style="font-size:.74rem;color:var(--verde);opacity:.8"></div>
+              </div>
+            </div>
+            <button type="button" onclick="quitarUbicacion()" style="background:none;border:none;color:var(--naranja);font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Cambiar</button>
+          </div>
+          <a id="ubic-preview-link" href="" target="_blank" style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.78rem;color:var(--verde);text-decoration:none;font-weight:600">
+            <span>🗺️</span> Ver en Google Maps
+          </a>
+        </div>
+
+        <input type="hidden" id="r-maps-lat" value="">
+        <input type="hidden" id="r-maps-lng" value="">
+      </div>
+      <div class="fg">
+        <label>Días y horario de atención</label>
+        <!-- Días -->
+        <div style="margin-bottom:10px">
+          <div style="font-size:.76rem;color:var(--texto-gris);margin-bottom:6px;font-weight:600">Días que atiende</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="dias-btns">
+            <button type="button" class="dia-btn" data-dia="Lun" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Lun</button>
+            <button type="button" class="dia-btn" data-dia="Mar" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Mar</button>
+            <button type="button" class="dia-btn" data-dia="Mié" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Mié</button>
+            <button type="button" class="dia-btn" data-dia="Jue" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Jue</button>
+            <button type="button" class="dia-btn" data-dia="Vie" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Vie</button>
+            <button type="button" class="dia-btn" data-dia="Sáb" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Sáb</button>
+            <button type="button" class="dia-btn" data-dia="Dom" onclick="toggleDia(this)" style="padding:6px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s">Dom</button>
+          </div>
+          <!-- Atajos rápidos -->
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <button type="button" onclick="selDias('semana')" style="font-size:.72rem;padding:3px 9px;border-radius:12px;border:1px solid var(--verde-claro);background:var(--verde-bg);color:var(--verde);cursor:pointer;font-family:inherit">Lun–Vie</button>
+            <button type="button" onclick="selDias('lunsab')" style="font-size:.72rem;padding:3px 9px;border-radius:12px;border:1px solid var(--verde-claro);background:var(--verde-bg);color:var(--verde);cursor:pointer;font-family:inherit">Lun–Sáb</button>
+            <button type="button" onclick="selDias('todos')" style="font-size:.72rem;padding:3px 9px;border-radius:12px;border:1px solid var(--verde-claro);background:var(--verde-bg);color:var(--verde);cursor:pointer;font-family:inherit">Todos los días</button>
+            <button type="button" onclick="selDias('ninguno')" style="font-size:.72rem;padding:3px 9px;border-radius:12px;border:1px solid var(--borde);background:#fff;color:var(--texto-gris);cursor:pointer;font-family:inherit">Limpiar</button>
+          </div>
+        </div>
+        <!-- Horario -->
+        <div style="font-size:.76rem;color:var(--texto-gris);margin-bottom:6px;font-weight:600">Horario</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <div style="font-size:.72rem;color:var(--texto-gris);margin-bottom:3px">Abre</div>
+            <input id="r-hora-abre" type="time" value="08:00" style="width:100%;padding:8px 10px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:.88rem;outline:none">
+          </div>
+          <div style="font-size:1rem;color:var(--texto-gris);padding-top:16px">→</div>
+          <div style="flex:1">
+            <div style="font-size:.72rem;color:var(--texto-gris);margin-bottom:3px">Cierra</div>
+            <input id="r-hora-cierra" type="time" value="20:00" style="width:100%;padding:8px 10px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:.88rem;outline:none">
+          </div>
+        </div>
+        <!-- Preview -->
+        <div id="horario-preview" style="margin-top:8px;background:var(--crema);border-radius:9px;padding:8px 12px;font-size:.82rem;color:var(--verde);font-weight:600;display:none"></div>
+        <input type="hidden" id="r-horario">
+      </div>
+      <div class="fg"><label>Descripción del negocio</label><textarea id="r-desc" placeholder="Describe tus platos, especialidades y lo que te hace único..."></textarea></div>
+      <div class="fg">
+        <label>Logo del negocio <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label>
+        <!-- Preview del logo -->
+        <div id="logo-preview-wrap" style="display:none;margin-bottom:10px;text-align:center">
+          <img id="logo-preview-img" src="" alt="logo" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--verde-claro);box-shadow:0 2px 10px rgba(0,0,0,.12)">
+          <div style="margin-top:6px">
+            <button onclick="quitarLogo()" style="background:none;border:none;color:#ef4444;font-size:.78rem;cursor:pointer;font-family:inherit">✕ Quitar imagen</button>
+          </div>
+        </div>
+        <!-- Botón subir logo -->
+        <label id="logo-upload-btn" style="display:flex;align-items:center;gap:10px;background:var(--crema);border:2px dashed var(--verde-claro);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s">
+          <span style="font-size:1.8rem">🖼️</span>
+          <div>
+            <div style="font-size:.85rem;font-weight:700;color:var(--verde)">Subir logo o foto del negocio</div>
+            <div style="font-size:.75rem;color:var(--texto-gris)">JPG, PNG — se verá circular en el catálogo</div>
+          </div>
+          <input type="file" id="r-logo-file" accept="image/*" style="display:none" onchange="previsualizarLogo(this)">
+        </label>
+        <!-- Emoji fallback -->
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <div style="flex:1;height:1px;background:var(--borde)"></div>
+          <span style="font-size:.75rem;color:var(--texto-gris)">o usá un emoji</span>
+          <div style="flex:1;height:1px;background:var(--borde)"></div>
+        </div>
+        <input id="r-emoji" type="text" placeholder="Ej: 🥗 ó 🍔 ó 🐔" maxlength="4" style="width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:1.1rem;outline:none;margin-top:8px;transition:border .2s;text-align:center">
+        <input type="hidden" id="r-logo-base64" value="">
+      </div>
+      <div class="fg"><label>Clave de acceso para tu negocio</label><input id="r-clave" type="password" placeholder="Elegí una clave para gestionar tu negocio"><small style="color:var(--texto-gris);font-size:.76rem;display:block;margin-top:4px">Con esta clave podrás subir tu menú del día. Guardala bien.</small></div>
+      <button class="btn-primary" onclick="registrar()">Registrarme gratis por 1 mes →</button>
+      <p class="form-note">Al registrarte aceptás continuar con un plan de pago después del mes de prueba.</p>
+    </div>
+  </div>
+
+  <!-- PANTALLA: SUBIR MENÚ DEL DÍA -->
+  <div id="p-menudia" class="hidden">
+    <div style="background:var(--crema)"><div class="back-bar"><button class="back-btn" onclick="irA('inicio')">← Volver</button></div></div>
+    <!-- LOGIN NEGOCIO PARA SUBIR MENÚ -->
+    <div id="menudia-login" class="form-wrap" style="max-width:420px">
+      <h2 style="font-size:1.4rem">Acceso negocio</h2>
+      <p class="form-sub">Ingresá tu negocio y clave para subir el menú del día.</p>
+      <div class="fg"><label>Tu negocio</label><select id="sel-neg-login"></select></div>
+      <div class="fg"><label>Clave de acceso</label><input id="login-clave-neg" type="password" placeholder="Tu clave de negocio"></div>
+      <div id="login-neg-error" style="color:#ef4444;font-size:.82rem;margin-bottom:.5rem;display:none">Clave incorrecta. Intentá de nuevo.</div>
+      <button class="btn-primary" onclick="loginNegocio()">Entrar →</button>
+      <p class="form-note" style="margin-top:8px">¿No tenés clave? <span style="color:var(--verde);cursor:pointer;font-weight:700" onclick="irA('registro')">Registrá tu negocio</span></p>
+
+    </div>
+
+    <div id="menudia-form" class="menudia-wrap" style="display:none">
+      <!-- Sesión activa -->
+      <div style="background:var(--verde-bg);border:1.5px solid var(--verde-claro);border-radius:11px;padding:10px 13px;margin-bottom:1rem;font-size:.83rem;color:var(--verde);display:flex;justify-content:space-between;align-items:center">
+        <span>✅ Sesión activa: <strong id="neg-sesion-nombre">—</strong></span>
+        <button onclick="cerrarSesionNeg()" style="background:none;border:none;color:var(--verde);font-size:.78rem;font-weight:700;cursor:pointer">Cerrar sesión</button>
+      </div>
+
+      <h2 id="menu-form-titulo">Subir menú</h2>
+      <p class="menudia-sub" id="menu-form-sub">Actualizá tu información. Se publica al instante.</p>
+      <div class="wsp-opt">💡 Completá el formulario y tocá <strong>Publicar</strong>. Aparece al instante en el catálogo.</div>
+
+      <div class="fg"><label>Tu negocio</label><select id="sel-neg-menu" disabled style="opacity:.7"></select></div>
+      <div class="fg"><label>Fecha</label><input type="date" id="fecha-dia"></div>
+
+      <!-- FORMULARIO ALMUERZO -->
+      <div id="form-almuerzo">
+        <div class="fg"><label>Sopa / Entrada</label><input id="m-sopa" type="text" placeholder="Ej: Sopa de maní"></div>
+        <div class="bloque">
+          <div class="bloque-title">🍛 Opciones de segundo plato (mín. 1 — máx. 3)</div>
+          <div id="seg-inputs">
+            <div class="sf-row"><input class="sf-emoji" type="text" value="🍗" maxlength="2"><input class="sf-input" type="text" placeholder="Ej: Arroz con pollo a la plancha"></div>
+            <div class="sf-row"><input class="sf-emoji" type="text" value="🥩" maxlength="2"><input class="sf-input" type="text" placeholder="Segunda opción (opcional)"></div>
+          </div>
+          <button class="btn-add-seg" id="btn-add-seg" onclick="addSeg()">+ Agregar tercera opción</button>
+        </div>
+        <div class="fg"><label>Acompañamiento / Ensalada <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label><input id="m-acomp" type="text" placeholder="Ej: Ensalada fresca"></div>
+        <div class="fg"><label>Bebida incluida <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label><input id="m-bebida" type="text" placeholder="Ej: Refresco del día"></div>
+        <div class="bloque">
+          <div class="bloque-title">💰 Precios</div>
+          <div class="pb-grid">
+            <div class="pb-field"><label>Menú completo (Bs)</label><input id="m-precio-completo" type="number" placeholder="Ej: 25"></div>
+            <div class="pb-field"><label>Solo segundo (Bs)</label><input id="m-precio-segundo" type="number" placeholder="Ej: 20"></div>
+            <div class="pb-field"><label>Solo sopa (Bs)</label><input id="m-precio-sopa" type="number" placeholder="Ej: 8"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULARIO COMIDA RÁPIDA -->
+      <div id="form-rapida" style="display:none">
+        <div style="background:var(--naranja-bg);border:1.5px solid var(--naranja);border-radius:11px;padding:10px 13px;margin-bottom:1rem;font-size:.82rem;color:var(--naranja-oscuro)">
+          🍔 Agregá o actualizá los platos de tu menú. Cada plato aparece en tu catálogo con precio.
+        </div>
+        <div class="bloque">
+          <div class="bloque-title" id="platos-titulo">🍽️ Platos del menú</div>
+          <div id="platos-inputs">
+            <div class="plato-row" style="margin-bottom:12px;background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:10px">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                <!-- Foto o emoji -->
+                <div class="plato-foto-wrap" style="position:relative;flex-shrink:0">
+                  <div class="plato-foto-preview" style="width:52px;height:52px;border-radius:10px;background:#f0f0f0;border:1.5px solid var(--borde);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="this.nextElementSibling.click()">
+                    <span class="plato-emoji-show" style="font-size:1.6rem">🍔</span>
+                    <img class="plato-img-show" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+                  </div>
+                  <input type="file" accept="image/*" class="plato-foto-input" style="display:none" onchange="previsualizarFotoPlato(this)">
+                  <div style="font-size:.65rem;color:var(--verde);text-align:center;margin-top:2px;cursor:pointer" onclick="this.previousElementSibling.previousElementSibling.nextElementSibling.click()">📷 Foto</div>
+                </div>
+                <!-- Emoji input -->
+                <input class="sf-emoji plato-emoji-input" type="text" value="🍔" maxlength="2" style="width:38px;text-align:center;padding:6px 4px;border:1.5px solid var(--borde);border-radius:8px;font-size:.9rem;outline:none" oninput="sincronizarEmoji(this)">
+                <!-- Nombre y precio -->
+                <input type="text" placeholder="Nombre del plato" style="flex:1;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.85rem;outline:none" class="plato-nombre">
+                <input type="number" placeholder="Bs" style="width:58px;padding:8px 6px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.85rem;outline:none;text-align:center" class="plato-precio">
+              </div>
+              <input type="text" placeholder="Descripción breve (opcional)" style="width:100%;padding:6px 10px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.78rem;outline:none;color:var(--texto-gris)" class="plato-desc">
+            </div>
+            <div class="plato-row" style="margin-bottom:12px;background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:10px">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                <div class="plato-foto-wrap" style="position:relative;flex-shrink:0">
+                  <div class="plato-foto-preview" style="width:52px;height:52px;border-radius:10px;background:#f0f0f0;border:1.5px solid var(--borde);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="this.nextElementSibling.click()">
+                    <span class="plato-emoji-show" style="font-size:1.6rem">🍟</span>
+                    <img class="plato-img-show" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+                  </div>
+                  <input type="file" accept="image/*" class="plato-foto-input" style="display:none" onchange="previsualizarFotoPlato(this)">
+                  <div style="font-size:.65rem;color:var(--verde);text-align:center;margin-top:2px;cursor:pointer" onclick="this.previousElementSibling.previousElementSibling.nextElementSibling.click()">📷 Foto</div>
+                </div>
+                <input class="sf-emoji plato-emoji-input" type="text" value="🍟" maxlength="2" style="width:38px;text-align:center;padding:6px 4px;border:1.5px solid var(--borde);border-radius:8px;font-size:.9rem;outline:none" oninput="sincronizarEmoji(this)">
+                <input type="text" placeholder="Nombre del plato" style="flex:1;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.85rem;outline:none" class="plato-nombre">
+                <input type="number" placeholder="Bs" style="width:58px;padding:8px 6px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.85rem;outline:none;text-align:center" class="plato-precio">
+              </div>
+              <input type="text" placeholder="Descripción breve (opcional)" style="width:100%;padding:6px 10px;border:1.5px solid var(--borde);border-radius:8px;font-family:inherit;font-size:.78rem;outline:none;color:var(--texto-gris)" class="plato-desc">
+            </div>
+          </div>
+          <button class="btn-add-seg" onclick="addPlato()" style="border-color:var(--naranja);color:var(--naranja)">+ Agregar otro plato</button>
+        </div>
+        <div class="fg" id="campo-categoria"><label>Categoría <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label>
+          <input id="r-categoria" type="text" placeholder="Ej: Hamburguesas, Pollo, Bebidas...">
+        </div>
+
+      </div>
+
+      <div class="fg" id="campo-notas"><label>Notas adicionales <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label><textarea id="m-notas" placeholder="Ej: Hay opción vegetariana hoy / Cerrado los domingos"></textarea></div>
+      <button class="btn-naranja" onclick="publicarMenu()">Publicar →</button>
+    </div><!-- fin menudia-form -->
+  </div>
+
+  <!-- PANTALLA: SUCCESS REGISTRO -->
+  <div id="p-success" class="hidden">
+    <div class="success-box">
+      <div class="success-icon">🎉</div>
+      <h2>¡Negocio registrado!</h2>
+      <p>Tu negocio ya aparece en el catálogo de ComidaConce para que todos los clientes de Concepción puedan encontrarte y hacer pedidos.</p>
+      <div class="success-btns">
+        <button class="btn-success" onclick="irA('inicio')">Ver el catálogo</button>
+        <button class="btn-success" style="background:var(--naranja)" onclick="irA('menudia')">Subir menú del día</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CARRITO -->
+  <div id="modal-carrito" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column">
+
+    <!-- HEADER con minimizar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem .8rem;border-bottom:1px solid var(--borde);flex-shrink:0">
+      <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">🛒 Tu pedido</div>
+      <button onclick="minimizarCarrito()" style="background:var(--verde-bg);border:1.5px solid var(--verde-claro);border-radius:20px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--verde);font-family:inherit">— Minimizar</button>
+    </div>
+
+    <!-- CONTENIDO SCROLLABLE -->
+    <div style="overflow-y:auto;padding:1rem 1.2rem;flex:1;-webkit-overflow-scrolling:touch">
+      <div id="modal-items"></div>
+      <div class="modal-total" id="modal-total"></div>
+
+      <!-- Nombre del cliente -->
+      <div style="margin-top:.9rem;margin-bottom:.5rem">
+        <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">👤 Pedido a nombre de</label>
+        <input id="nombre-cliente" type="text" placeholder="Ej: Juan García" style="width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:10px;font-family:inherit;font-size:.88rem;outline:none">
+      </div>
+
+      <!-- Hora de recogida -->
+      <label style="font-size:.82rem;font-weight:600;display:block;margin-top:.7rem;margin-bottom:3px">⏰ Hora de recogida</label>
+      <select class="hora-sel" id="hora-recogida">
+        <option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option>
+        <option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option>
+        <option>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
+      </select>
+    </div>
+
+    <!-- BOTÓN FIJO ABAJO -->
+    <div style="padding:.8rem 1.2rem 1.2rem;border-top:1px solid var(--borde);flex-shrink:0">
+      <button class="btn-wsp" onclick="enviarWSP()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.77.46 3.43 1.27 4.87L2 22l5.27-1.25A9.96 9.96 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18.19c-1.66 0-3.2-.45-4.53-1.23l-.32-.19-3.13.74.78-3.04-.21-.34A8.16 8.16 0 013.81 12c0-4.52 3.67-8.19 8.19-8.19s8.19 3.67 8.19 8.19-3.67 8.19-8.19 8.19z"/></svg>
+        Enviar pedido por WhatsApp
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- BARRA CARRITO -->
+  <div class="carrito-bar" id="carrito-bar">
+    <div class="c-info"><strong id="c-count">0 pedidos</strong><span id="c-total">Bs 0</span></div>
+    <div style="display:flex;gap:7px;align-items:center">
+      <button onclick="cancelarPedido()" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;padding:7px 12px;border-radius:18px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🗑️ Anular</button>
+      <button class="btn-ver-pedido" onclick="abrirModalCarrito()">Ver pedido →</button>
+    </div>
+  </div>
+
+
+<!-- ── PANTALLA DE PAGO / VENCIMIENTO ── -->
+<div id="pago-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,45,30,.97);z-index:600;overflow-y:auto;-webkit-overflow-scrolling:touch">
+  <div style="background:#fff;width:100%;max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column">
+
+    <!-- STEP 1 -->
+    <div id="pago-step-1">
+
+      <!-- Header compacto -->
+      <div style="background:linear-gradient(135deg,#1b4332,#2d6a4f);padding:1.2rem 1.25rem 1rem;text-align:center">
+        <div style="display:inline-block;background:rgba(231,111,81,.25);border:1px solid rgba(231,111,81,.5);color:#fcd9cc;font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:20px;margin-bottom:.6rem">⏰ Período de prueba vencido</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:.3rem">Activá tu membresía</div>
+        <div style="font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.5">Elegí tu plan, pagá por QR y subí el comprobante.<br>Tu negocio se reactiva al instante.</div>
+      </div>
+
+      <div style="padding:1.1rem 1.25rem">
+
+        <!-- PASO 1: Plan -->
+        <div style="font-size:.75rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">1 · Elegí tu plan</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.1rem">
+          <div id="plan-pago-almuerzo" onclick="selPlanPago('almuerzo')" style="border:2px solid #e5e7eb;border-radius:13px;padding:12px 10px;text-align:center;cursor:pointer;transition:all .2s">
+            <div style="font-size:1.6rem;margin-bottom:4px">🥗</div>
+            <div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Almuerzo Diario</div>
+            <div style="font-size:.72rem;color:#6b7280;margin-bottom:5px">Actualizá tu menú cada día</div>
+            <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:900;color:#2d6a4f">Bs 15/mes</div>
+          </div>
+          <div id="plan-pago-rapida" onclick="selPlanPago('rapida')" style="border:2px solid #e5e7eb;border-radius:13px;padding:12px 10px;text-align:center;cursor:pointer;transition:all .2s">
+            <div style="font-size:1.6rem;margin-bottom:4px">🍔</div>
+            <div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Comida Rápida</div>
+            <div style="font-size:.72rem;color:#6b7280;margin-bottom:5px">Fotos de platos y menú editable</div>
+            <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:900;color:#2d6a4f">Bs 20/mes</div>
+          </div>
+        </div>
+
+        <!-- PASO 2: QR (oculto hasta elegir plan) -->
+        <div id="qr-display" style="display:none">
+          <div style="font-size:.75rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">2 · Escaneá y pagá</div>
+          <div style="background:#fdf8f0;border-radius:14px;padding:1rem;margin-bottom:1rem;text-align:center;border:1px solid #e5e7eb">
+            <div style="font-size:.8rem;font-weight:600;color:#2d6a4f;margin-bottom:8px">Escaneá desde tu billetera digital</div>
+            <div id="qr-img-container" style="width:160px;height:160px;margin:0 auto;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center">
+              <div style="font-size:.78rem;color:#6b7280;padding:.5rem;text-align:center;line-height:1.5">El admin aún no cargó el QR.<br>Contactalo por WhatsApp.</div>
+            </div>
+            <div id="qr-monto-txt" style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;color:#2d6a4f;margin-top:.6rem">—</div>
+            <div style="font-size:.74rem;color:#6b7280;margin-top:2px">Pagá el monto exacto</div>
+          </div>
+
+          <!-- PASO 3: Comprobante -->
+          <div style="font-size:.75rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">3 · Subí tu comprobante</div>
+
+          <!-- Botones para elegir fuente -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#d8f3dc;border:2px solid #52b788;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center">
+              <span style="font-size:1.4rem">🖼️</span>
+              <span style="font-size:.8rem;font-weight:700;color:#2d6a4f">Desde fototeca</span>
+              <input type="file" accept="image/*" style="display:none" onchange="previsualizarComprobante(this)">
+            </label>
+            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fce4d6;border:2px solid #e76f51;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center">
+              <span style="font-size:1.4rem">📷</span>
+              <span style="font-size:.8rem;font-weight:700;color:#c1440e">Tomar foto</span>
+              <input type="file" accept="image/*" capture="environment" style="display:none" onchange="previsualizarComprobante(this)">
+            </label>
+          </div>
+
+          <!-- Preview comprobante -->
+          <div id="comprobante-box" style="display:none;background:#f0fdf4;border:1.5px solid #52b788;border-radius:12px;padding:10px;margin-bottom:10px;text-align:center">
+            <div style="font-size:.78rem;font-weight:600;color:#2d6a4f;margin-bottom:6px">✅ Comprobante listo</div>
+            <img id="comprobante-preview" src="" alt="comprobante" style="max-width:100%;max-height:140px;border-radius:8px;object-fit:cover">
+          </div>
+
+          <button id="btn-activar" onclick="activarConComprobante()" disabled style="width:100%;background:#aaa;color:#fff;border:none;padding:14px;border-radius:13px;font-size:1rem;font-weight:700;cursor:not-allowed;font-family:inherit;margin-bottom:8px;transition:background .2s">
+            Enviar comprobante y activar
+          </button>
+          <button onclick="cerrarPago()" style="width:100%;background:none;border:none;padding:9px;color:#6b7280;font-family:inherit;font-size:.83rem;cursor:pointer">Cancelar</button>
+        </div>
+
+        <!-- Hint sin plan -->
+        <div id="qr-no-plan" style="text-align:center;padding:1.5rem 0;color:#6b7280;font-size:.85rem">
+          👆 Seleccioná un plan para ver el QR
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 2: Éxito -->
+    <div id="pago-step-2" style="display:none;text-align:center;padding:2.5rem 1.25rem;flex:1;display:none;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:3.5rem;margin-bottom:.8rem">🎉</div>
+      <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:#2d6a4f;margin-bottom:.4rem">¡Membresía activada!</div>
+      <p style="font-size:.86rem;color:#6b7280;line-height:1.5;margin-bottom:1rem">Tu negocio ya está activo. Tus clientes pueden verte y hacer pedidos ahora mismo.</p>
+      <div style="background:#fce4d6;border-radius:12px;padding:.8rem 1rem;font-size:.78rem;color:#c1440e;line-height:1.5;margin-bottom:1.2rem;text-align:left">
+        ⚠️ El comprobante fue enviado al administrador para verificación. Si el pago no es válido, la membresía puede ser suspendida.
+      </div>
+      <button onclick="cerrarPago()" style="width:100%;background:#2d6a4f;color:#fff;border:none;padding:14px;border-radius:13px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">Volver al catálogo →</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- BANNER INSTALAR APP -->
+<div id="install-banner" style="display:none;position:fixed;bottom:70px;left:0;right:0;z-index:250;padding:0 1rem">
+  <div style="background:var(--verde-oscuro);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.3)">
+    <div style="font-size:2rem;flex-shrink:0">📱</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:.88rem;font-weight:700;color:#fff">Instalar ComidaConce</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.75);margin-top:1px">Agregá el acceso directo a tu pantalla</div>
+    </div>
+    <button id="btn-install" onclick="instalarApp()" style="background:var(--amarillo);color:var(--verde-oscuro);border:none;padding:8px 14px;border-radius:20px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Instalar</button>
+    <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.2rem;cursor:pointer;padding:0;flex-shrink:0">✕</button>
+  </div>
+</div>
+
+<!-- INSTRUCCIONES iOS (Safari no soporta beforeinstallprompt) -->
+<div id="ios-banner" style="display:none;position:fixed;bottom:70px;left:0;right:0;z-index:250;padding:0 1rem">
+  <div style="background:var(--verde-oscuro);border-radius:16px;padding:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.8rem">📱</span>
+        <div>
+          <div style="font-size:.88rem;font-weight:700;color:#fff">Instalar ComidaConce</div>
+          <div style="font-size:.74rem;color:rgba(255,255,255,.7)">Acceso directo en tu pantalla</div>
+        </div>
+      </div>
+      <button onclick="document.getElementById('ios-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.2rem;cursor:pointer;padding:0">✕</button>
+    </div>
+    <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px">
+      <div style="font-size:.78rem;color:#fff;line-height:1.8">
+        1. Tocá el botón <strong style="background:rgba(255,255,255,.2);padding:1px 6px;border-radius:4px">Compartir</strong> ↑ abajo de Safari<br>
+        2. Buscá <strong>"Agregar a pantalla de inicio"</strong><br>
+        3. Tocá <strong>"Agregar"</strong> — ¡listo!
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- fin app-cliente -->
+
+<!-- ═══════════════════════════════════════════════
+     PANEL ADMIN (acceso separado)
+═══════════════════════════════════════════════ -->
+<div id="app-admin" class="hidden">
+
+  <div class="admin-nav">
+    <div>
+      <span class="admin-nav-title">ComidaConce Admin <span>Panel de gestión</span></span>
+    </div>
+    <button class="btn-nav" onclick="salirAdmin()" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)">← Salir</button>
+  </div>
+
+  <div class="admin-wrap">
+    <h2>Panel de Administración</h2>
+    <div style="background:var(--verde-bg);border:1.5px solid var(--verde-claro);border-radius:11px;padding:10px 14px;margin-bottom:1rem;font-size:.82rem;color:var(--verde);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span>📱 Tu WhatsApp admin (para recibir comprobantes):</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input id="admin-wsp-input" type="tel" placeholder="Ej: 76543210" style="padding:5px 10px;border:1.5px solid var(--verde-claro);border-radius:8px;font-family:inherit;font-size:.82rem;width:160px;outline:none">
+        <button onclick="guardarAdminWSP()" style="background:var(--verde);color:#fff;border:none;padding:5px 11px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">Guardar</button>
+      </div>
+    </div>
+
+    <div class="notif-bar">
+      <span>⚠️ 2 negocios con prueba próxima a vencer (en 3 días)</span>
+      <button class="btn-notif" onclick="alert('Recordatorios enviados por WhatsApp:\nPollos El Chino ✓\nLa Abuela ✓')">Enviar recordatorios</button>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="admin-stats">
+      <div class="astat"><div class="astat-num" id="adm-total">—</div><div class="astat-lbl">Total negocios</div></div>
+      <div class="astat"><div class="astat-num" id="adm-activos">3</div><div class="astat-lbl">Membresías activas</div></div>
+      <div class="astat"><div class="astat-num" id="adm-prueba">2</div><div class="astat-lbl">En período prueba</div></div>
+      <div class="astat"><div class="astat-num">Bs 70</div><div class="astat-lbl">Ingresos/mes</div></div>
+    </div>
+
+    <!-- TODOS LOS NEGOCIOS -->
+    <div class="admin-section-title">Todos los negocios</div>
+    <div style="background:#fef9c3;border:1.5px solid #f4a261;border-radius:11px;padding:9px 13px;margin-bottom:.8rem;font-size:.8rem;color:#713f12">
+      ⭐ <strong>Socios promotores</strong> — Marcá un negocio como socio y nunca verá el mensaje de vencimiento. Membresía permanente gratuita para tus colaboradores.
+    </div>
+    <div class="admin-table">
+      <div class="ath"><span>Negocio</span><span>Tipo</span><span>Estado</span><span>Acción</span></div>
+      <div id="adm-tabla-todos"></div>
+    </div>
+
+    <!-- QR DE PAGO -->
+    <div class="admin-section-title">Códigos QR de pago</div>
+    <div style="background:var(--blanco);border-radius:13px;box-shadow:var(--sombra);padding:14px;margin-bottom:1.4rem">
+      <p style="font-size:.82rem;color:var(--texto-gris);margin-bottom:12px">Subí los QR de tu billetera digital. Se muestran a los negocios cuando vence su membresía.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--verde);margin-bottom:6px">QR — Bs 15/mes (Almuerzo)</div>
+          <div style="border:1.5px solid var(--borde);border-radius:10px;padding:10px;text-align:center;background:var(--crema)" id="qr10-preview">
+            <div style="font-size:.78rem;color:var(--texto-gris)" id="qr10-txt">Sin QR cargado</div>
+          </div>
+          <label style="display:block;margin-top:8px;background:var(--verde);color:#fff;border-radius:8px;padding:6px 10px;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer">
+            📷 Subir QR Bs 10<input type="file" accept="image/*" style="display:none" onchange="subirQR(this,'qr20')">
+          </label>
+        </div>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--naranja);margin-bottom:6px">QR — Bs 20/mes (Rápida)</div>
+          <div style="border:1.5px solid var(--borde);border-radius:10px;padding:10px;text-align:center;background:var(--crema)" id="qr15-preview">
+            <div style="font-size:.78rem;color:var(--texto-gris)" id="qr15-txt">Sin QR cargado</div>
+          </div>
+          <label style="display:block;margin-top:8px;background:var(--naranja);color:#fff;border-radius:8px;padding:6px 10px;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer">
+            📷 Subir QR Bs 15<input type="file" accept="image/*" style="display:none" onchange="subirQR(this,'qr20')">
+          </label>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--texto-gris);margin-top:10px;text-align:center">Los QR se guardan localmente. En Firebase estarán en la nube.</div>
+    </div>
+
+
+
+  </div>
+</div><!-- fin app-admin -->
+
+<!-- LOGIN ADMIN (oculto) -->
+<div id="admin-login" class="hidden" style="position:fixed;inset:0;background:rgba(27,67,50,.97);z-index:999;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:2rem;width:90%;max-width:340px;text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">🔐</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:1.5rem;color:var(--verde);margin-bottom:.3rem">Panel Admin</h2>
+    <p style="font-size:.85rem;color:var(--texto-gris);margin-bottom:1.2rem">Acceso exclusivo para el administrador de ComidaConce</p>
+    <input id="admin-pass" type="password" placeholder="Contraseña" style="width:100%;padding:10px 13px;border:1.5px solid var(--borde);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none;margin-bottom:.8rem">
+    <button onclick="loginAdmin()" style="width:100%;background:var(--verde);color:#fff;border:none;padding:12px;border-radius:11px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit">Entrar</button>
+    <button onclick="document.getElementById('admin-login').classList.add('hidden')" style="width:100%;background:none;border:none;padding:8px;color:var(--texto-gris);cursor:pointer;font-family:inherit;font-size:.82rem;margin-top:5px">Cancelar</button>
+    <p id="login-error" style="color:#ef4444;font-size:.8rem;margin-top:6px;display:none">Contraseña incorrecta</p>
+  </div>
+</div>
+
+<!-- ACCESO ADMIN OCULTO: triple toque en el logo -->
+<script>
+/* ══════════════════════════════════════════
+   DATOS
+══════════════════════════════════════════ */
+const NEGOCIOS_DEMO = [
+  {
+    id:1, tipo:'rapida', nombre:'Burgers Conce', emoji:'🍔',
+    desc:'Las mejores hamburguesas artesanales de Concepción',
+    tags:['Hamburguesas','Sándwiches','Papas fritas'],
+    horario:'11:00–22:00', abierto:true, premium:true, wsp:'59171234567',
+    menu:[
+      {cat:'🍔 Hamburguesas',items:[
+        {id:101,nombre:'Burger Clásica',desc:'Carne, lechuga, tomate, queso',precio:25,emoji:'🍔'},
+        {id:102,nombre:'Burger Doble',desc:'Doble carne, bacon, queso cheddar',precio:35,emoji:'🍔'},
+        {id:103,nombre:'Burger Pollo',desc:'Pechuga apanada, salsa especial',precio:28,emoji:'🐔'},
+      ]},
+      {cat:'🍟 Acompañamientos',items:[
+        {id:104,nombre:'Papas fritas',desc:'Crocantes con sal y salsas',precio:12,emoji:'🍟'},
+        {id:105,nombre:'Salchipapas',desc:'Papas, salchicha y cremas',precio:18,emoji:'🍟'},
+      ]},
+      {cat:'🥤 Bebidas',items:[
+        {id:106,nombre:'Refresco',desc:'Coca-cola, Fanta, Sprite',precio:8,emoji:'🥤'},
+        {id:107,nombre:'Jugo natural',desc:'Naranja, mango o maracuyá',precio:12,emoji:'🍊'},
+      ]}
+    ]
+  },
+  {
+    id:2, tipo:'almuerzo', nombre:'Doña Carmen', emoji:'🥗',
+    desc:'Almuerzo casero y nutritivo todos los días',
+    tags:['Almuerzo','Casero','Sopas'],
+    horario:'11:30–14:30', abierto:true, premium:true, wsp:'59173688229', clave:'carmen123',
+    menuDia:{
+      fecha:'Hoy, miércoles 8 de abril',
+      sopa:{nombre:'Sopa de maní',emoji:'🍲'},
+      segundos:[
+        {nombre:'Arroz con pollo a la plancha',emoji:'🍗'},
+        {nombre:'Majao de charque',emoji:'🍛'},
+        {nombre:'Piraña frita con yuca',emoji:'🐟'},
+      ],
+      acompanamiento:{nombre:'Ensalada fresca',emoji:'🥗'},
+      bebida:{nombre:'Refresco del día',emoji:'🥤'},
+      precios:{completo:15,soloSegundo:12,soloSopa:5}
+    }
+  },
+  {
+    id:3, tipo:'rapida', nombre:'Pollos El Chino', emoji:'🐔',
+    desc:'Pollo frito y broaster estilo oriental',
+    tags:['Pollo','Broaster','Familiar'],
+    horario:'12:00–21:00', abierto:true, premium:false, wsp:'59173456789',
+    menu:[{cat:'🐔 Pollos',items:[
+      {id:201,nombre:'Pollo broaster 1/4',desc:'Con yuca frita y ensalada',precio:28,emoji:'🐔'},
+      {id:202,nombre:'Pollo broaster 1/2',desc:'Con yuca frita y ensalada',precio:48,emoji:'🐔'},
+      {id:203,nombre:'Combo familiar',desc:'1 pollo entero + 4 jugos + guarnición',precio:85,emoji:'🍗'},
+    ]}]
+  },
+  {
+    id:4, tipo:'almuerzo', nombre:'La Abuela', emoji:'🍲',
+    desc:'Comida tradicional boliviana, recetas de siempre',
+    tags:['Tradicional','Casero','Económico'],
+    horario:'11:00–14:00', abierto:false, premium:false, wsp:'59174567890', clave:'abuela123',
+    menuDia:{
+      fecha:'Hoy, miércoles 8 de abril',
+      sopa:{nombre:'Sopa de fideos con verduras',emoji:'🥣'},
+      segundos:[
+        {nombre:'Majao de charque',emoji:'🍛'},
+        {nombre:'Locro de gallina',emoji:'🍲'},
+      ],
+      acompanamiento:{nombre:'Arroz blanco',emoji:'🍚'},
+      bebida:{nombre:'Jugo de temporada',emoji:'🍹'},
+      precios:{completo:12,soloSegundo:10,soloSopa:5}
+    }
+  },
+  {
+    id:5, tipo:'rapida', nombre:'Pizza Don Rafa', emoji:'🍕',
+    desc:'Pizzas al horno de barro y pastas artesanales',
+    tags:['Pizza','Pasta','Italiana'],
+    horario:'18:00–23:00', abierto:false, premium:true, wsp:'59175678901',
+    menu:[
+      {cat:'🍕 Pizzas',items:[
+        {id:301,nombre:'Pizza Margherita',desc:'Salsa, mozzarella, albahaca',precio:35,emoji:'🍕'},
+        {id:302,nombre:'Pizza Especial',desc:'Jamón, champiñones, aceitunas, extra queso',precio:45,emoji:'🍕'},
+        {id:303,nombre:'Pizza Familiar',desc:'Elige 2 sabores, tamaño grande',precio:65,emoji:'🍕'},
+      ]},
+      {cat:'🍝 Pastas',items:[
+        {id:304,nombre:'Spaghetti bolognesa',desc:'Carne molida, salsa casera',precio:30,emoji:'🍝'},
+        {id:305,nombre:'Fettuccine Alfredo',desc:'Crema, parmesano, ajo',precio:32,emoji:'🍝'},
+      ]}
+    ]
+  },
+  {
+    id:8, tipo:'postres', nombre:'Fresas & Delicias', emoji:'🍓',
+    desc:'Fresas con crema, jugos naturales y antojos dulces',
+    tags:['Postres','Fresas','Jugos','Antojos'],
+    horario:'09:00–21:00', abierto:true, premium:false, wsp:'59178000001', clave:'fresas123',
+    estado:'prueba',
+    fechaRegistro:'09/04/2026',
+    fechaVence:'09/05/2026',
+    menu:[{cat:'🍓 Fresas & Postres', items:[
+      {id:801,nombre:'Fresas con crema',desc:'Fresas frescas con crema batida y miel',precio:15,emoji:'🍓'},
+      {id:802,nombre:'Fresas con chocolate',desc:'Bañadas en chocolate derretido',precio:18,emoji:'🍫'},
+      {id:803,nombre:'Jugo natural',desc:'Naranja, mango o maracuyá',precio:10,emoji:'🥤'},
+      {id:804,nombre:'Helado artesanal',desc:'3 sabores a elección',precio:12,emoji:'🍦'},
+    ]}]
+  },
+  {
+    id:7, tipo:'almuerzo', nombre:'Doña Pola', emoji:'🍱',
+    desc:'Almuerzo casero, menú del día variado',
+    tags:['Almuerzo','Casero'],
+    horario:'11:00–14:00', abierto:true, premium:false, wsp:'59177000001', clave:'pola123',
+    estado:'prueba',
+    fechaRegistro:'01/03/2026',
+    fechaVence:'01/03/2026',
+    menuDia:{
+      fecha:'Hoy',
+      sopa:{nombre:'Sopa de verduras',emoji:'🥣'},
+      segundos:[{nombre:'Arroz con carne',emoji:'🍛'}],
+      acompanamiento:{nombre:'Ensalada',emoji:'🥗'},
+      bebida:{nombre:'Jugo',emoji:'🥤'},
+      precios:{completo:13,soloSegundo:10,soloSopa:5}
+    }
+  },
+  {
+    id:6, tipo:'almuerzo', nombre:'Menú El Rancho', emoji:'🤠',
+    desc:'Almuerzo del llano, auténtico sabor cruceño',
+    tags:['Cruceño','Almuerzo','Tradicional'],
+    horario:'11:00–14:30', abierto:true, premium:false, wsp:'59176789012', clave:'rancho123',
+    menuDia:{
+      fecha:'Hoy, miércoles 8 de abril',
+      sopa:{nombre:'Caldo de res',emoji:'🍜'},
+      segundos:[
+        {nombre:'Locro con yuca',emoji:'🍲'},
+        {nombre:'Majao de res',emoji:'🥩'},
+        {nombre:'Arroz con chancho',emoji:'🐷'},
+      ],
+      acompanamiento:{nombre:'Ensalada de tomate',emoji:'🥗'},
+      bebida:{nombre:'Chicha morada',emoji:'🍵'},
+      precios:{completo:14,soloSegundo:11,soloSopa:5}
+    }
+  }
+];
+
+/* ══════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════ */
+let carrito=[], negActual=null, almState={};
+
+/* ── localStorage ── */
+function getRegistrados(){ try{return JSON.parse(localStorage.getItem('cc_negocios')||'[]');}catch(e){return[];} }
+function guardarRegistrados(l){ localStorage.setItem('cc_negocios',JSON.stringify(l)); }
+function getHistorial(){ try{return JSON.parse(localStorage.getItem('cc_historial')||'[]');}catch(e){return[];} }
+function guardarHistorial(l){ localStorage.setItem('cc_historial',JSON.stringify(l)); }
+function getTodos(){
+  var menus = {};
+  try{ menus = JSON.parse(localStorage.getItem('cc_menus')||'{}'); }catch(e){ menus={}; }
+  var socios = getSociosDemo();
+  const demos = NEGOCIOS_DEMO.map(function(n){
+    var extra = {};
+    if(menus[String(n.id)]) extra.menuDia = menus[String(n.id)];
+    if(socios[n.id]) extra.socio = true;
+    return Object.assign({}, n, extra);
+  });
+  return [...demos, ...getRegistrados()];
+}
+
+/* ══════════════════════════════════════════
+   NAVEGACIÓN CLIENTE
+══════════════════════════════════════════ */
+const PANTALLAS_CLIENTE = ['inicio','negocio','registro','menudia','success'];
+
+function irA(pantalla){
+  PANTALLAS_CLIENTE.forEach(p=>document.getElementById('p-'+p).classList.add('hidden'));
+  document.getElementById('p-'+pantalla).classList.remove('hidden');
+  window.scrollTo(0,0);
+  if(pantalla==='inicio'){ renderGrid(getTodos()); actualizarStats(); }
+  if(pantalla==='menudia'){
+    poblarSelectMenu();
+    if(!negSesion){
+      document.getElementById('menudia-login').style.display='block';
+      document.getElementById('menudia-form').style.display='none';
+    } else {
+      document.getElementById('menudia-login').style.display='none';
+      document.getElementById('menudia-form').style.display='block';
+      document.getElementById('neg-sesion-nombre').textContent=negSesion.nombre;
+      poblarSelectMenu();
+    }
+  }
+}
+
+function abrirMenuMobile(){ document.getElementById('mobile-panel').classList.add('open'); }
+function cerrarMenuMobile(){ document.getElementById('mobile-panel').classList.remove('open'); }
+
+/* ══════════════════════════════════════════
+   GRID DE NEGOCIOS
+══════════════════════════════════════════ */
+function renderGrid(lista){
+  const g=document.getElementById('grid');
+  document.getElementById('sec-count').textContent=lista.length+' negocio'+(lista.length!==1?'s':'');
+  if(!lista.length){ g.innerHTML='<p style="color:var(--texto-gris);padding:1rem 0;grid-column:1/-1">No se encontraron negocios.</p>'; return; }
+  g.innerHTML=lista.map(n=>`
+    <div class="neg-card ${n.tipo==="postres"?"postres":n.tipo}" onclick="verNegocio(${n.id})">
+      <div class="card-img ${n.tipo==='rapida'?'rb':n.tipo==='postres'?'pb':'ab'}">
+        ${n.logo
+          ? `<img src="${n.logo}" alt="${n.nombre}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.15)">`
+          : `<span style="font-size:3.5rem">${n.emoji}</span>`
+        }
+        <div class="card-badges">
+          <span class="cbadge ${n.tipo==='rapida'?'cb-r':n.tipo==='postres'?'cb-pos':'cb-a'}">${n.tipo==='rapida'?'Comida Rápida':n.tipo==='postres'?'Postres & Antojos':'Almuerzo Día'}</span>
+          ${n.premium?'<span class="cbadge cb-p">⭐ Premium</span>':''}
+          ${n.socio?'<span class="cbadge" style="background:#f4a261;color:#7a4800">🤝 Socio</span>':''}
+          ${!n.abierto?'<span class="cbadge cb-c">Cerrado</span>':''}
+          ${n._nuevo?'<span class="cbadge cb-new">✨ Nuevo</span>':''}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-nombre">${n.nombre}</div>
+        <div class="card-desc">${n.desc}</div>
+        <div class="card-tags">${n.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-foot">
+          <span>🕐 ${n.horario}</span>
+          <span class="${n.abierto?'abierto':'cerrado'}">${n.abierto?'● Abierto':'● Cerrado'}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function actualizarStats(){
+  const todos=getTodos();
+  document.getElementById('stat-total').textContent=todos.length;
+  document.getElementById('stat-abiertos').textContent=todos.filter(n=>n.abierto).length;
+  const at=document.getElementById('adm-total');
+  if(at) at.textContent=todos.length;
+}
+
+function filtrar(tipo,btn){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const labels={todos:'Todos los negocios',rapida:'Comida Rápida',almuerzo:'Almuerzos del Día',abierto:'Abiertos ahora',premium:'Negocios Premium'};
+  document.getElementById('sec-label').textContent=labels[tipo]||'Negocios';
+  const todos=getTodos();
+  let lista=todos;
+  if(tipo==='rapida') lista=todos.filter(n=>n.tipo==='rapida');
+  else if(tipo==='almuerzo') lista=todos.filter(n=>n.tipo==='almuerzo');
+  else if(tipo==='postres') lista=todos.filter(n=>n.tipo==='postres');
+  else if(tipo==='abierto') lista=todos.filter(n=>n.abierto);
+  else if(tipo==='premium') lista=todos.filter(n=>n.premium);
+  renderGrid(lista);
+}
+
+function filtrarTexto(){
+  const q=document.getElementById('buscador').value.toLowerCase();
+  const todos=getTodos();
+  if(!q){ renderGrid(todos); return; }
+  renderGrid(todos.filter(n=>n.nombre.toLowerCase().includes(q)||n.desc.toLowerCase().includes(q)||n.tags.some(t=>t.toLowerCase().includes(q))));
+}
+
+/* ══════════════════════════════════════════
+   DETALLE NEGOCIO
+══════════════════════════════════════════ */
+function verNegocio(id){
+  negActual=getTodos().find(n=>n.id===id);
+  const n=negActual;
+  if(!almState[n.id]) almState[n.id]={pack:'completo',segIdx:0,qty:1};
+
+  document.getElementById('neg-header').innerHTML=`
+    <div class="neg-logo" style="overflow:hidden;padding:${n.logo?'0':''}">
+      ${n.logo
+        ? `<img src="${n.logo}" alt="${n.nombre}" style="width:64px;height:64px;object-fit:cover;border-radius:14px;display:block">`
+        : `<span style="font-size:2.5rem">${n.emoji}</span>`
+      }
+    </div>
+    <div class="neg-info">
+      <h2>${n.nombre}</h2>
+      <p>${n.desc}</p>
+      <div class="neg-sub">🕐 ${n.horario} &nbsp;·&nbsp; <span style="color:${n.abierto?'#52b788':'#f87171'}">${n.abierto?'● Abierto ahora':'● Cerrado'}</span></div>
+      ${n.direccion?`<div class="neg-sub" style="margin-top:3px">📍 ${n.direccion}</div>`:''}
+      <div class="neg-badges">
+        <span class="cbadge ${n.tipo==='rapida'?'cb-r':'cb-a'}" style="position:static">${n.tipo==='rapida'?'Comida Rápida':'Almuerzo del Día'}</span>
+        ${n.premium?'<span class="cbadge cb-p" style="position:static">⭐ Premium</span>':''}
+      </div>
+    </div>`;
+
+  renderNegBody();
+  irA('negocio');
+}
+
+function renderNegBody(){
+  const n=negActual; let body='';
+
+  if(n.tipo==='rapida'&&n.menu){
+    body+=n.menu.map(cat=>`
+      <div class="menu-cat">${cat.cat}</div>
+      ${cat.items.map(it=>`
+        <div class="menu-item">
+          <div class="mi-l">
+            ${(n.premium||it.foto)?`<div class="mi-foto" style="overflow:hidden;padding:0">${it.foto?`<img src="${it.foto}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:1.5rem">${it.emoji}</span>`}</div>`:''}
+            <div><div class="mi-nombre">${it.nombre}</div><div class="mi-desc">${it.desc}</div></div>
+          </div>
+          <div class="mi-r">
+            <span class="precio">Bs ${it.precio}</span>
+            <button class="btn-agregar-item" onclick="agregarItem(${it.id},event)">+ Agregar</button>
+          </div>
+        </div>`).join('')}`).join('');
+  }
+
+  if(n.tipo==='almuerzo'&&n.menuDia) body+=renderAlmuerzo(n);
+
+  // Build ubicacion URL
+  const ubicUrl = n.mapsUrl
+    ? n.mapsUrl
+    : 'https://maps.google.com/?q='+encodeURIComponent((n.nombre||'')+(n.direccion?', '+n.direccion+', Concepción, Bolivia':', Concepción, Bolivia'));
+
+  body+=`
+    <div class="wsp-box">
+      <div class="wsp-box-title">Contacto y ubicación</div>
+      <a class="wsp-link" href="https://wa.me/${n.wsp}" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.77.46 3.43 1.27 4.87L2 22l5.27-1.25A9.96 9.96 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18.19c-1.66 0-3.2-.45-4.53-1.23l-.32-.19-3.13.74.78-3.04-.21-.34A8.16 8.16 0 013.81 12c0-4.52 3.67-8.19 8.19-8.19s8.19 3.67 8.19 8.19-3.67 8.19-8.19 8.19z"/></svg>
+        Contactar por WhatsApp
+      </a>
+      <div style="border-top:1px solid var(--borde);margin:10px 0"></div>
+      <a href="${ubicUrl}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:var(--crema);border:1.5px solid var(--borde);border-radius:11px;padding:10px 13px;transition:background .2s" onclick="">
+        <span style="font-size:1.3rem">📍</span>
+        <div style="flex:1">
+          <div style="font-size:.86rem;font-weight:700;color:var(--texto)">Ver ubicación en Google Maps</div>
+          <div style="font-size:.75rem;color:var(--texto-gris);margin-top:1px">${n.direccion||'Concepción, Santa Cruz, Bolivia'}</div>
+        </div>
+        <span style="font-size:.8rem;color:var(--verde);font-weight:700">Abrir →</span>
+      </a>
+    </div>`;
+
+  document.getElementById('neg-body').innerHTML=body;
+}
+
+function renderAlmuerzo(n){
+  const m=n.menuDia, st=almState[n.id], p=m.precios, tOpc=m.segundos.length>1;
+  const pActual=st.pack==='completo'?p.completo:st.pack==='soloSegundo'?p.soloSegundo:p.soloSopa;
+  return `
+    <span class="dia-label">📅 ${m.fecha}</span>
+    <div class="alm-sec">¿Qué querés pedir?</div>
+    <div class="pack-grid">
+      <div class="pack-card${st.pack==='completo'?' active':''}" onclick="selPack(${n.id},'completo')">
+        <div class="pack-check"></div>
+        <div class="pack-title">🍲🍛🥗 Menú completo</div>
+        <div class="pack-desc">Sopa + segundo + acompañamiento + bebida</div>
+        <div class="pack-price">Bs ${p.completo}</div>
+      </div>
+      <div class="pack-card${st.pack==='soloSegundo'?' active':''}" onclick="selPack(${n.id},'soloSegundo')">
+        <div class="pack-check"></div>
+        <div class="pack-title">🍛 Solo segundo</div>
+        <div class="pack-desc">Sin sopa ni bebida incluida</div>
+        <div class="pack-price">Bs ${p.soloSegundo}</div>
+      </div>
+      ${p.soloSopa?`<div class="pack-card${st.pack==='soloSopa'?' active':''}" onclick="selPack(${n.id},'soloSopa')" style="grid-column:1/-1">
+        <div class="pack-check"></div>
+        <div class="pack-title">🍲 Solo sopa / entrada</div>
+        <div class="pack-desc">Solo la sopa del día sin segundo plato</div>
+        <div class="pack-price">Bs ${p.soloSopa}</div>
+      </div>`:''}
+    </div>
+    ${st.pack!=='soloSegundo'?`
+    <div class="alm-sec">Entrada del día</div>
+    <div class="alm-card">
+      <span class="alm-emoji">${m.sopa.emoji}</span>
+      <div class="alm-text"><div class="alm-nombre">${m.sopa.nombre}</div></div>
+      <span class="alm-precio-tag">Bs ${p.soloSopa||5}</span>
+    </div>`:''}
+    ${st.pack!=='soloSopa'?`
+    <div class="alm-sec">${tOpc?'Elegí tu segundo plato':'Segundo plato'}</div>
+    ${m.segundos.map((s,i)=>`
+      <div class="alm-card sel-opt${st.segIdx===i?' selected':''}" onclick="selSegundo(${n.id},${i})">
+        ${tOpc?`<div class="alm-radio"><div class="radio-dot"></div></div>`:''}
+        <span class="alm-emoji">${s.emoji}</span>
+        <div class="alm-text">
+          <div class="alm-nombre">${s.nombre}</div>
+          ${tOpc?`<div class="alm-sub-text">Opción ${i+1} de ${m.segundos.length}</div>`:''}
+        </div>
+      </div>`).join('')}`:''}
+    ${st.pack==='completo'?`
+    <div class="alm-sec">También incluye</div>
+    <div class="alm-card"><span class="alm-emoji">${m.acompanamiento.emoji}</span><div class="alm-text"><div class="alm-nombre">${m.acompanamiento.nombre}</div></div></div>
+    <div class="alm-card"><span class="alm-emoji">${m.bebida.emoji}</span><div class="alm-text"><div class="alm-nombre">${m.bebida.nombre}</div></div></div>`:''}
+    <hr class="sep">
+    <div class="alm-footer">
+      <div class="alm-footer-top">
+        <div>
+          <div class="alm-precio-lbl">Precio por pedido</div>
+          <div class="alm-precio-val">Bs ${pActual}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="cambiarQtyAlm(${n.id},-1)">−</button>
+            <span class="qty-num" id="qty-${n.id}">${st.qty||1}</span>
+            <button class="qty-btn" onclick="cambiarQtyAlm(${n.id},1)">+</button>
+          </div>
+          <button class="btn-agregar-alm" onclick="agregarAlmuerzo(${n.id})">+ Agregar al pedido</button>
+        </div>
+      </div>
+      <div class="alm-resumen" id="alm-res-${n.id}">${buildResumen(n.id)}</div>
+      ${tOpc?`<div class="alm-hint" id="alm-hint-${n.id}">Por favor elegí tu opción de segundo plato.</div>`:''}
+    </div>`;
+}
+
+function buildResumen(nid){
+  const n=getTodos().find(x=>x.id===nid); if(!n||!n.menuDia) return '';
+  const m=n.menuDia, st=almState[nid], qty=st.qty||1, seg=m.segundos[st.segIdx||0];
+  if(st.pack==='completo') return `Menú completo: ${m.sopa.nombre} + ${seg.nombre} × ${qty}`;
+  if(st.pack==='soloSegundo') return `Solo 2do: ${seg.nombre} × ${qty}`;
+  return `Solo sopa: ${m.sopa.nombre} × ${qty}`;
+}
+
+function selPack(nid,pack){ almState[nid].pack=pack; renderNegBody(); }
+function selSegundo(nid,idx){
+  almState[nid].segIdx=idx;
+  const h=document.getElementById(`alm-hint-${nid}`); if(h) h.classList.remove('show');
+  renderNegBody();
+}
+function cambiarQtyAlm(nid,delta){
+  if(!almState[nid]) almState[nid]={pack:'completo',segIdx:0,qty:1};
+  almState[nid].qty=Math.max(1,(almState[nid].qty||1)+delta);
+  const el=document.getElementById(`qty-${nid}`); if(el) el.textContent=almState[nid].qty;
+  const res=document.getElementById(`alm-res-${nid}`); if(res) res.textContent=buildResumen(nid);
+}
+function agregarAlmuerzo(nid){
+  const n=getTodos().find(x=>x.id===nid), m=n.menuDia, st=almState[nid], p=m.precios;
+  const qty=st.qty||1, seg=m.segundos[st.segIdx||0], pack=st.pack;
+  let nombre,precio,uid;
+  if(pack==='completo'){ nombre=`Menú completo — ${seg.emoji} ${seg.nombre}`; precio=p.completo; uid=nid*10000+100+(st.segIdx||0); }
+  else if(pack==='soloSegundo'){ nombre=`Solo 2do — ${seg.emoji} ${seg.nombre}`; precio=p.soloSegundo; uid=nid*10000+200+(st.segIdx||0); }
+  else { nombre=`Solo sopa — ${m.sopa.emoji} ${m.sopa.nombre}`; precio=p.soloSopa; uid=nid*10000+300; }
+  // Si el carrito tiene items de otro negocio, preguntar antes de mezclar
+  if(carrito.length>0 && carrito[0].wsp!==n.wsp){
+    if(!confirm('Tu pedido actual es de '+carrito[0].negocio+'.\n¿Querés vaciarlo y empezar un pedido nuevo de '+n.nombre+'?')) return;
+    carrito=[];
+  }
+  const ex=carrito.find(c=>c.id===uid);
+  if(ex) ex.qty+=qty; else carrito.push({id:uid,nombre,emoji:'🥗',precio,qty,negocio:n.nombre,wsp:n.wsp});
+  almState[nid].qty=1; updateCarrito();
+  const btn=document.querySelector('.btn-agregar-alm');
+  if(btn){btn.textContent='✓ Agregado!';btn.style.background='var(--verde-claro)';setTimeout(()=>{if(btn){btn.textContent='+ Agregar al pedido';btn.style.background='';}},1200);}
+}
+
+/* ── COMIDA RÁPIDA ── */
+function agregarItem(itemId,e){
+  e&&e.stopPropagation(); let item=null;
+  negActual.menu.forEach(c=>c.items.forEach(i=>{if(i.id===itemId)item=i;}));
+  if(!item) return;
+  // Si el carrito tiene items de otro negocio, preguntar antes de mezclar
+  if(carrito.length>0 && carrito[0].wsp!==negActual.wsp){
+    if(!confirm('Tu pedido actual es de '+carrito[0].negocio+'.\n¿Querés vaciarlo y empezar un pedido nuevo de '+negActual.nombre+'?')) return;
+    carrito=[];
+  }
+  const ex=carrito.find(c=>c.id===itemId);
+  if(ex) ex.qty++; else carrito.push({...item,qty:1,negocio:negActual.nombre,wsp:negActual.wsp});
+  updateCarrito();
+}
+
+/* ══════════════════════════════════════════
+   CARRITO
+══════════════════════════════════════════ */
+function updateCarrito(){
+  const total=carrito.reduce((s,c)=>s+c.precio*c.qty,0);
+  const count=carrito.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('c-count').textContent=count+' pedido'+(count!==1?'s':'');
+  document.getElementById('c-total').textContent='Bs '+total;
+  const bar=document.getElementById('carrito-bar');
+  if(carrito.length>0) bar.classList.add('show'); else bar.classList.remove('show');
+}
+
+function abrirModalCarrito(){
+  document.getElementById('modal-items').innerHTML=carrito.map(c=>`
+    <div class="modal-item">
+      <div style="flex:1;min-width:0">
+        <div class="modal-item-name">${c.emoji||'🍽️'} ${c.nombre}</div>
+        <div class="modal-item-neg">${c.negocio}</div>
+      </div>
+      <div class="m-qty">
+        <button class="m-qty-btn" onclick="cambiarQtyCarrito(${c.id},-1)">−</button>
+        <span style="font-weight:600;font-size:.88rem">${c.qty}</span>
+        <button class="m-qty-btn" onclick="cambiarQtyCarrito(${c.id},1)">+</button>
+        <span class="m-precio">Bs ${c.precio*c.qty}</span>
+      </div>
+    </div>`).join('');
+  document.getElementById('modal-total').textContent='Total: Bs '+carrito.reduce((s,c)=>s+c.precio*c.qty,0);
+  mostrarModal();
+}
+
+function minimizarCarrito(){
+  ocultarModal();
+}
+
+function cancelarPedido(){
+  carrito=[];
+  updateCarrito();
+  ocultarModal();
+}
+
+function ocultarModal(){
+  document.getElementById('modal-carrito').style.display='none';
+}
+
+function mostrarModal(){
+  document.getElementById('modal-carrito').style.display='flex';
+}
+
+function cambiarQtyCarrito(id,delta){
+  const idx=carrito.findIndex(c=>c.id===id); if(idx===-1) return;
+  carrito[idx].qty+=delta;
+  if(carrito[idx].qty<=0) carrito.splice(idx,1);
+  updateCarrito();
+  if(carrito.length) abrirModalCarrito(); else document.getElementById('modal-carrito').classList.add('hidden');
+}
+
+function enviarWSP(){
+  if(!carrito.length) return;
+  const hora = document.getElementById('hora-recogida').value;
+  const nombreEl = document.getElementById('nombre-cliente');
+  const nombre = nombreEl ? nombreEl.value.trim() : '';
+  const wsp = carrito[0].wsp||'59170000000';
+  const items = carrito.map(c=>`• ${c.nombre} × ${c.qty} = Bs ${c.precio*c.qty}`).join('\n');
+  const total = carrito.reduce((s,c)=>s+c.precio*c.qty,0);
+  const nombreLinea = nombre ? `\n👤 Pedido a nombre de: *${nombre}*` : '';
+  const msg = encodeURIComponent(
+    `¡Hola! Quiero hacer un pedido para *recoger*:\n\n${items}\n\n*Total: Bs ${total}*\n⏰ Hora de recogida: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
+  );
+  window.open(`https://wa.me/${wsp}?text=${msg}`,'_blank');
+}
+
+/* ══════════════════════════════════════════
+   REGISTRO NEGOCIO
+══════════════════════════════════════════ */
+function selPlan(tipo){
+  ['rapida','almuerzo','postres'].forEach(function(t){
+    var el = document.getElementById('plan-'+t);
+    if(el) el.classList.remove('sel');
+  });
+  var sel = document.getElementById('plan-'+tipo);
+  if(sel) sel.classList.add('sel');
+}
+
+function registrar(){
+  const nombre=document.getElementById('r-nombre').value.trim();
+  const wspInput=document.getElementById('r-wsp').value.trim().replace(/\D/g,'');
+  // Auto-agregar prefijo Bolivia 591 si no lo tiene
+  const wspRaw = wspInput.startsWith('591') ? wspInput : '591' + wspInput;
+  const dir=document.getElementById('r-dir').value.trim();
+  const mapsInput = document.getElementById('r-maps').value.trim();
+  const mapsLat = document.getElementById('r-maps-lat').value;
+  const mapsLng = document.getElementById('r-maps-lng').value;
+  // Build mapsUrl from coords if available, else use pasted link
+  const mapsUrl = mapsLat && mapsLng
+    ? 'https://maps.google.com/?q='+mapsLat+','+mapsLng
+    : mapsInput || '';
+  const horario=document.getElementById('r-horario').value.trim()||'08:00–20:00';
+  const desc=document.getElementById('r-desc').value.trim()||'Negocio de comida en Concepción';
+  const emoji=document.getElementById('r-emoji').value.trim()||'🍽️';
+  const logoBase64=document.getElementById('r-logo-base64').value||'';
+  const clave=document.getElementById('r-clave').value.trim();
+  const tipo = document.getElementById('plan-almuerzo').classList.contains('sel')
+    ? 'almuerzo'
+    : document.getElementById('plan-postres').classList.contains('sel')
+      ? 'postres'
+      : 'rapida';
+
+  if(!nombre){ alert('Por favor ingresá el nombre del negocio.'); document.getElementById('r-nombre').focus(); return; }
+  if(!wspRaw){ alert('Por favor ingresá el número de WhatsApp.'); document.getElementById('r-wsp').focus(); return; }
+  if(!clave||clave.length<4){ alert('Por favor elegí una clave de al menos 4 caracteres para tu negocio.'); document.getElementById('r-clave').focus(); return; }
+
+  // ── VALIDACIÓN ANTI-ABUSO ──
+  // Revisar historial completo: registros actuales + historial de vencidos
+  const historial = getHistorial(); // todos los que alguna vez se registraron
+  const registrados = getRegistrados();
+  const todosConocidos = [...historial, ...registrados];
+
+  // Normalizar para comparación (minúsculas, sin espacios extras)
+  const nombreNorm = nombre.toLowerCase().replace(/\s+/g,' ').trim();
+  const wspNorm = wspRaw.replace(/\D/g,'');
+
+  // Buscar coincidencia por WhatsApp
+  const duplicadoWSP = todosConocidos.find(n => n.wsp && n.wsp.replace(/\D/g,'') === wspNorm);
+  // Buscar coincidencia por nombre
+  const duplicadoNombre = todosConocidos.find(n => n.nombre && n.nombre.toLowerCase().replace(/\s+/g,' ').trim() === nombreNorm);
+
+  if(duplicadoWSP || duplicadoNombre){
+    const wspDisplay = wspNorm.startsWith('591') ? wspNorm.slice(3) : wspNorm;
+    const motivo = duplicadoWSP && duplicadoNombre
+      ? 'El número de WhatsApp y el nombre del negocio'
+      : duplicadoWSP
+        ? 'El número ' + wspDisplay
+        : 'El nombre "' + nombre + '"';
+
+    const tipo2 = (duplicadoWSP||duplicadoNombre).tipo === 'almuerzo' ? 'Almuerzo Diario (Bs 15/mes)' : 'Comida Rápida (Bs 20/mes)';
+
+    const continuar = confirm(
+      '⚠️ ' + motivo + ' ya fue utilizado en una prueba gratuita anterior.\n\n' +
+      'El período de prueba es solo una vez por negocio.\n\n' +
+      'Para continuar en ComidaConce necesitás activar tu membresía.\n' +
+      'Plan sugerido: ' + tipo2 + '\n\n' +
+      '¿Querés contactar al administrador para activar tu plan?'
+    );
+    if(continuar){
+      window.open('https://wa.me/59170000000?text=' + encodeURIComponent(
+        '¡Hola! Quiero activar mi membresía en ComidaConce.\n' +
+        'Negocio: ' + nombre + '\n' +
+        'WhatsApp: +' + wspRaw
+      ), '_blank');
+    }
+    return; // No permite el registro
+  }
+
+  const nuevo={
+    id:Date.now(), nombre, wsp:wspRaw, direccion:dir, mapsUrl, horario, desc, emoji, logo:logoBase64, tipo, clave,
+    premium:false, abierto:true, _nuevo:true,
+    tags:tipo==='almuerzo'?['Almuerzo','Casero']:tipo==='postres'?['Postres','Antojos','Fresas']:['Comida Rápida'],
+    estado:'prueba',
+    fechaRegistro:new Date().toLocaleDateString('es-BO'),
+    fechaVence:new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('es-BO'),
+    menu:tipo==='rapida'?[{cat:'🍽️ Menú',items:[{id:Date.now()+1,nombre:'Menú en preparación',desc:'El negocio actualizará su menú pronto',precio:0,emoji:'🍽️'}]}]:null,
+    menuDia:tipo==='almuerzo'?{
+      fecha:'Pendiente de actualización',
+      sopa:{nombre:'Sopa del día (pendiente)',emoji:'🍲'},
+      segundos:[{nombre:'Segundo plato (pendiente)',emoji:'🍛'}],
+      acompanamiento:{nombre:'Acompañamiento',emoji:'🥗'},
+      bebida:{nombre:'Bebida',emoji:'🥤'},
+      precios:{completo:0,soloSegundo:0,soloSopa:0}
+    }:null,
+  };
+
+  const lista=getRegistrados(); lista.push(nuevo); guardarRegistrados(lista);
+  ['r-nombre','r-wsp','r-dir','r-maps','r-maps-lat','r-maps-lng','r-horario','r-hora-abre','r-hora-cierra','r-emoji','r-clave','r-logo-base64'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  quitarUbicacion();
+  selDias('ninguno');
+  const prev=document.getElementById('horario-preview');
+  if(prev) prev.style.display='none';
+  document.getElementById('r-desc').value='';
+  quitarLogo();
+  actualizarStats();
+  irA('success');
+}
+
+/* ── Subir Menú ── */
+let negSesion=null; // negocio autenticado actualmente
+
+function poblarSelectMenu(){
+  // Poblar el select del login
+  const selLogin=document.getElementById('sel-neg-login');
+  if(selLogin){
+    const todos=getTodos();
+    selLogin.innerHTML=todos.length
+      ? todos.map(n=>`<option value="${n.id}">${n.emoji} ${n.nombre}</option>`).join('')
+      : '<option value="">Sin negocios registrados</option>';
+  }
+  // Poblar el select del formulario (solo muestra el negocio autenticado)
+  const selForm=document.getElementById('sel-neg-menu');
+  if(selForm && negSesion){
+    selForm.innerHTML=`<option value="${negSesion.id}">${negSesion.emoji} ${negSesion.nombre}</option>`;
+  }
+}
+
+function loginNegocio(){
+  const selLogin=document.getElementById('sel-neg-login');
+  const claveInput=document.getElementById('login-clave-neg');
+  const error=document.getElementById('login-neg-error');
+  const id=parseInt(selLogin.value);
+  const clave=claveInput.value.trim();
+  // Buscar en todos (demo + registrados)
+  const neg=getTodos().find(n=>n.id===id);
+  if(!neg||neg.clave!==clave){
+    error.style.display='block'; claveInput.value=''; claveInput.focus(); return;
+  }
+  error.style.display='none';
+  claveInput.value='';
+
+  // Verificar si está vencido
+  if(estaVencido(neg)){
+    negSesion = neg;
+    // Cerrar el panel de menudia y mostrar pantalla de pago
+    document.getElementById('menudia-login').style.display='block';
+    document.getElementById('menudia-form').style.display='none';
+    mostrarPago(neg);
+    return;
+  }
+
+  negSesion=neg;
+  document.getElementById('menudia-login').style.display='none';
+  document.getElementById('menudia-form').style.display='block';
+  document.getElementById('neg-sesion-nombre').textContent=neg.nombre;
+  poblarSelectMenu();
+  // Mostrar formulario correcto según tipo
+  adaptarFormulario(neg.tipo);
+}
+
+function adaptarFormulario(tipo){
+  const esAlmuerzo = tipo === 'almuerzo';
+  const esPostres = tipo === 'postres';
+  const fa = document.getElementById('form-almuerzo');
+  const fr = document.getElementById('form-rapida');
+  if(fa) fa.style.display = esAlmuerzo ? 'block' : 'none';
+  if(fr) fr.style.display = esAlmuerzo ? 'none' : 'block';
+  const titulo = document.getElementById('menu-form-titulo');
+  const sub = document.getElementById('menu-form-sub');
+  if(titulo) titulo.textContent = esAlmuerzo ? 'Subir menú del día' : (esPostres ? 'Editar mis postres y antojos' : 'Editar mi menú');
+  if(sub) sub.textContent = esAlmuerzo
+    ? 'Actualizá tu menú de hoy. Se publica al instante.'
+    : esPostres
+      ? 'Editá tus productos — fresas, jugos, helados y más. Se actualiza al instante.'
+      : 'Editá tus platos actuales o agregá nuevos. Se actualiza al instante.';
+
+  // Si es comida rápida o postres, cargar el menú existente
+  if(!esAlmuerzo && negSesion) cargarMenuExistente();
+
+  // Adapt form labels for postres vs rapida
+  const bTitle = document.querySelector('#form-rapida .bloque-title');
+  const catField = document.querySelector('#form-rapida .fg:has(#r-categoria)');
+  const notasField = document.querySelector('#form-rapida .fg:has(#m-notas)');
+  const hint = document.querySelector('#form-rapida .wsp-opt, #menudia-form .wsp-opt');
+
+  if(esPostres){
+    if(bTitle) bTitle.innerHTML = '🍓 Tus productos (fresas, helados, jugos...)';
+    // Hide categoria and notas for postres
+    var catEl = document.getElementById('campo-categoria');
+    var notasEl = document.getElementById('campo-notas');
+    if(catEl) catEl.style.display='none';
+    if(notasEl) notasEl.style.display='none';
+    // Change default emojis to postres emojis
+    const rows = document.querySelectorAll('#platos-inputs .plato-row');
+    const postresEmojis = ['🍓','🍦'];
+    rows.forEach(function(row, i){
+      const emojiInput = row.querySelector('.plato-emoji-input');
+      const emojiShow = row.querySelector('.plato-emoji-show');
+      if(emojiInput && !emojiInput.value.trim() || emojiInput && emojiInput.value==='🍔' || emojiInput && emojiInput.value==='🍟'){
+        const em = postresEmojis[i] || '🍰';
+        emojiInput.value = em;
+        if(emojiShow) emojiShow.textContent = em;
+      }
+      const nombre = row.querySelector('.plato-nombre');
+      if(nombre) nombre.placeholder = 'Ej: Fresas con crema, Helado artesanal...';
+    });
+    // Update add button text
+    const addBtn = document.querySelector('#form-rapida .btn-add-seg');
+    if(addBtn) addBtn.textContent = '+ Agregar otro postre';
+  } else {
+    if(bTitle) bTitle.innerHTML = '🍽️ Platos del menú';
+    var catEl = document.getElementById('campo-categoria');
+    var notasEl = document.getElementById('campo-notas');
+    if(catEl) catEl.style.display='';
+    if(notasEl) notasEl.style.display='';
+    const addBtn = document.querySelector('#form-rapida .btn-add-seg');
+    if(addBtn) addBtn.textContent = '+ Agregar otro plato';
+  }
+}
+
+function cargarMenuExistente(){
+  if(!negSesion) return;
+  const neg = getTodos().find(n=>n.id===negSesion.id);
+  if(!neg || !neg.menu) return;
+
+  const cont = document.getElementById('platos-inputs');
+  if(!cont) return;
+
+  // Recopilar todos los items de todas las categorías
+  const items = [];
+  neg.menu.forEach(function(cat){
+    if(cat.items) cat.items.forEach(function(it){ items.push({...it, cat: cat.cat}); });
+  });
+
+  // Si no hay items reales (solo el placeholder), no cargar
+  if(items.length === 0 || (items.length === 1 && items[0].nombre === 'Menú en preparación')) return;
+
+  // Limpiar el contenedor y cargar los items existentes
+  cont.innerHTML = '';
+
+  // Actualizar categoría con la primera cat
+  const catInput = document.getElementById('r-categoria');
+  if(catInput && neg.menu[0]) catInput.value = neg.menu[0].cat.replace(/^[^a-zA-ZáéíóúÁÉÍÓÚ]+/, '').trim();
+
+  items.forEach(function(it, i){
+    const row = document.createElement('div');
+    row.className = 'plato-row';
+    row.style.cssText = 'margin-bottom:12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:10px;position:relative';
+    row.innerHTML = `
+      <button onclick="this.parentElement.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:#ef4444;font-size:1rem;cursor:pointer;padding:0;line-height:1">✕</button>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div class="plato-foto-wrap" style="position:relative;flex-shrink:0">
+          <div class="plato-foto-preview" style="width:52px;height:52px;border-radius:10px;background:#f0f0f0;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="this.nextElementSibling.click()">
+            ${it.foto
+              ? `<img class="plato-img-show" src="${it.foto}" style="width:100%;height:100%;object-fit:cover"><span class="plato-emoji-show" style="font-size:1.6rem;display:none">${it.emoji||'🍽️'}</span>`
+              : `<span class="plato-emoji-show" style="font-size:1.6rem">${it.emoji||'🍽️'}</span><img class="plato-img-show" src="" style="display:none;width:100%;height:100%;object-fit:cover">`
+            }
+          </div>
+          <input type="file" accept="image/*" class="plato-foto-input" style="display:none" onchange="previsualizarFotoPlato(this)" ${it.foto?`data-base64="${it.foto}"`:''}> 
+          <div style="font-size:.65rem;color:#2d6a4f;text-align:center;margin-top:2px;cursor:pointer" onclick="this.previousElementSibling.previousElementSibling.nextElementSibling.click()">📷 ${it.foto?'Cambiar':'Foto'}</div>
+        </div>
+        <input class="sf-emoji plato-emoji-input" type="text" value="${it.emoji||'🍽️'}" maxlength="2" style="width:38px;text-align:center;padding:6px 4px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;outline:none" oninput="sincronizarEmoji(this)">
+        <input type="text" placeholder="Nombre del plato" value="${it.nombre||''}" style="flex:1;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:.85rem;outline:none" class="plato-nombre">
+        <input type="number" placeholder="Bs" value="${it.precio||''}" style="width:58px;padding:8px 6px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:.85rem;outline:none;text-align:center" class="plato-precio">
+      </div>
+      <input type="text" placeholder="Descripción breve (opcional)" value="${it.desc||''}" style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:.78rem;outline:none;color:#6b7280" class="plato-desc">`;
+
+    // Restore foto base64 if exists
+    if(it.foto){
+      const fi = row.querySelector('.plato-foto-input');
+      if(fi) fi.setAttribute('data-base64', it.foto);
+    }
+    cont.appendChild(row);
+  });
+}
+
+function cerrarSesionNeg(){
+  negSesion=null;
+  document.getElementById('menudia-login').style.display='block';
+  document.getElementById('menudia-form').style.display='none';
+  document.getElementById('login-clave-neg').value='';
+  document.getElementById('login-neg-error').style.display='none';
+}
+let numSeg=2;
+function addSeg(){
+  if(numSeg>=3) return; numSeg++;
+  const cont=document.getElementById('seg-inputs'), row=document.createElement('div'); row.className='sf-row';
+  row.innerHTML=`<input class="sf-emoji" type="text" value="🍽️" maxlength="2"><input class="sf-input" type="text" placeholder="Tercera opción de segundo">`;
+  cont.appendChild(row); document.getElementById('btn-add-seg').style.display='none';
+}
+
+function addPlato(){
+  const cont = document.getElementById('platos-inputs');
+  const esPostres = negSesion && negSesion.tipo === 'postres';
+  const emojDefault = esPostres ? '🍓' : '🍽️';
+  const placeholder = esPostres ? 'Ej: Fresas con crema, Helado...' : 'Nombre del plato';
+  const row = document.createElement('div');
+  row.className='plato-row';
+  row.style.cssText='margin-bottom:12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:10px;position:relative';
+  row.innerHTML=`
+    <button onclick="this.parentElement.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:#ef4444;font-size:1rem;cursor:pointer;padding:0;line-height:1">✕</button>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <div class="plato-foto-wrap" style="position:relative;flex-shrink:0">
+        <div class="plato-foto-preview" style="width:52px;height:52px;border-radius:10px;background:#f0f0f0;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="this.nextElementSibling.click()">
+          <span class="plato-emoji-show" style="font-size:1.6rem">${emojDefault}</span>
+          <img class="plato-img-show" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+        </div>
+        <input type="file" accept="image/*" class="plato-foto-input" style="display:none" onchange="previsualizarFotoPlato(this)">
+        <div style="font-size:.65rem;color:#2d6a4f;text-align:center;margin-top:2px;cursor:pointer" onclick="this.previousElementSibling.previousElementSibling.nextElementSibling.click()">📷 Foto</div>
+      </div>
+      <input class="sf-emoji plato-emoji-input" type="text" value="${emojDefault}" maxlength="2" style="width:38px;text-align:center;padding:6px 4px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:.9rem;outline:none" oninput="sincronizarEmoji(this)">
+      <input type="text" placeholder="${placeholder}" style="flex:1;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:.85rem;outline:none" class="plato-nombre">
+      <input type="number" placeholder="Bs" style="width:58px;padding:8px 6px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:.85rem;outline:none;text-align:center" class="plato-precio">
+    </div>
+    <input type="text" placeholder="Descripción breve (opcional)" style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:.78rem;outline:none;color:#6b7280" class="plato-desc">`;
+  cont.appendChild(row);
+}
+
+function previsualizarFotoPlato(input){
+  const file = input.files[0]; if(!file) return;
+  const row = input.closest('.plato-foto-wrap');
+  const preview = row.querySelector('.plato-foto-preview');
+  const emojiShow = preview.querySelector('.plato-emoji-show');
+  const imgShow = preview.querySelector('.plato-img-show');
+  const reader = new FileReader();
+  reader.onload = function(e){
+    input.setAttribute('data-base64', e.target.result);
+    imgShow.src = e.target.result;
+    imgShow.style.display = 'block';
+    emojiShow.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function sincronizarEmoji(input){
+  // Update the emoji shown in the preview
+  const row = input.closest('.plato-row');
+  const emojiShow = row.querySelector('.plato-emoji-show');
+  const imgShow = row.querySelector('.plato-img-show');
+  // Only update if no photo loaded
+  if(imgShow && imgShow.style.display === 'none'){
+    if(emojiShow) emojiShow.textContent = input.value || '🍽️';
+  }
+}
+function mostrarInstalacion(){
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if(isInStandalone){
+    alert('✅ ComidaConce ya está instalada en tu dispositivo.');
+    return;
+  }
+  if(isIOS){
+    document.getElementById('ios-banner').style.display='block';
+  } else if(deferredPrompt){
+    instalarApp();
+  } else {
+    alert('Para instalar ComidaConce:\n\n📱 En iPhone/iPad:\nCompartir → Agregar a pantalla de inicio\n\n🤖 En Android:\nMenú del navegador → Agregar a pantalla de inicio');
+  }
+}
+
+/* ── HORARIO PICKER ── */
+function toggleDia(btn){
+  const activo = btn.style.background === 'rgb(45, 106, 79)' || btn.classList.contains('dia-activo');
+  if(activo){
+    btn.style.background='#fff';
+    btn.style.color='';
+    btn.style.borderColor='var(--borde)';
+    btn.classList.remove('dia-activo');
+  } else {
+    btn.style.background='#2d6a4f';
+    btn.style.color='#fff';
+    btn.style.borderColor='#2d6a4f';
+    btn.classList.add('dia-activo');
+  }
+  actualizarHorarioPreview();
+}
+
+function selDias(preset){
+  const todos = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const semana = ['Lun','Mar','Mié','Jue','Vie'];
+  const lunsab = ['Lun','Mar','Mié','Jue','Vie','Sáb'];
+  let activos = [];
+  if(preset==='semana') activos=semana;
+  else if(preset==='lunsab') activos=lunsab;
+  else if(preset==='todos') activos=todos;
+  // else ninguno = []
+  document.querySelectorAll('.dia-btn').forEach(function(btn){
+    const dia = btn.getAttribute('data-dia');
+    if(activos.includes(dia)){
+      btn.style.background='#2d6a4f';
+      btn.style.color='#fff';
+      btn.style.borderColor='#2d6a4f';
+      btn.classList.add('dia-activo');
+    } else {
+      btn.style.background='#fff';
+      btn.style.color='';
+      btn.style.borderColor='#e5e7eb';
+      btn.classList.remove('dia-activo');
+    }
+  });
+  actualizarHorarioPreview();
+}
+
+function actualizarHorarioPreview(){
+  const diasActivos = [];
+  document.querySelectorAll('.dia-btn.dia-activo').forEach(function(btn){
+    diasActivos.push(btn.getAttribute('data-dia'));
+  });
+  const abre = document.getElementById('r-hora-abre');
+  const cierra = document.getElementById('r-hora-cierra');
+  const preview = document.getElementById('horario-preview');
+  const hidden = document.getElementById('r-horario');
+
+  if(diasActivos.length===0){
+    if(preview) preview.style.display='none';
+    if(hidden) hidden.value='';
+    return;
+  }
+
+  // Format time to 12h or keep 24h
+  function fmt(t){ if(!t) return ''; const [h,m]=t.split(':'); const hh=parseInt(h); return hh+':'+(m||'00'); }
+
+  // Compress dias: Lun-Vie, Lun-Sáb, etc.
+  const orden = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  let diasStr = '';
+  if(diasActivos.length===7) diasStr='Todos los días';
+  else if(JSON.stringify(diasActivos)===JSON.stringify(['Lun','Mar','Mié','Jue','Vie'])) diasStr='Lun–Vie';
+  else if(JSON.stringify(diasActivos)===JSON.stringify(['Lun','Mar','Mié','Jue','Vie','Sáb'])) diasStr='Lun–Sáb';
+  else diasStr=diasActivos.join(', ');
+
+  const horaStr = abre&&cierra&&abre.value&&cierra.value ? fmt(abre.value)+'–'+fmt(cierra.value) : '';
+  const full = diasStr + (horaStr?' · '+horaStr:'');
+
+  if(preview){ preview.textContent='🕐 '+full; preview.style.display='block'; }
+  if(hidden) hidden.value=full;
+}
+
+// Update preview when time changes
+document.addEventListener('DOMContentLoaded',function(){
+  const abre=document.getElementById('r-hora-abre');
+  const cierra=document.getElementById('r-hora-cierra');
+  if(abre) abre.addEventListener('change', actualizarHorarioPreview);
+  if(cierra) cierra.addEventListener('change', actualizarHorarioPreview);
+});
+
+/* ── GEOLOCALIZACIÓN ── */
+function detectarUbicacion(){
+  if(!navigator.geolocation){
+    alert('Tu navegador no soporta geolocalización. Usá la opción de Google Maps.');
+    return;
+  }
+  const btn = event.currentTarget;
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<span style="font-size:1.6rem">⏳</span><div><div style="font-size:.88rem;font-weight:700;color:var(--verde)">Detectando ubicación...</div><div style="font-size:.74rem;color:var(--texto-gris)">Permite el acceso cuando se solicite</div></div>';
+  btn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      document.getElementById('r-maps-lat').value = lat;
+      document.getElementById('r-maps-lng').value = lng;
+      document.getElementById('ubic-coords-txt').textContent = lat + ', ' + lng;
+      const mapsLink = 'https://maps.google.com/?q='+lat+','+lng;
+      document.getElementById('ubic-preview-link').href = mapsLink;
+      document.getElementById('ubic-sin').style.display = 'none';
+      document.getElementById('ubic-con').style.display = 'block';
+      btn.innerHTML = origHTML;
+      btn.disabled = false;
+    },
+    function(err){
+      btn.innerHTML = origHTML;
+      btn.disabled = false;
+      if(err.code === 1){
+        alert('Permiso denegado. Activá la ubicación en la configuración de tu navegador o usá el link de Google Maps.');
+      } else {
+        alert('No se pudo detectar la ubicación. Intentá de nuevo o usá el link de Google Maps.');
+      }
+    },
+    {enableHighAccuracy:true, timeout:10000}
+  );
+}
+
+function abrirGoogleMaps(){
+  // Open Google Maps so user can find their location, copy link and paste
+  window.open('https://maps.google.com', '_blank');
+  setTimeout(function(){
+    alert('1. Buscá tu negocio en Google Maps\n2. Tocá el pin de tu ubicación\n3. Tocá "Compartir" → "Copiar enlace"\n4. Volvé aquí y pegá el link en el campo de abajo');
+  }, 500);
+}
+
+function onMapsInput(input){
+  const val = input.value.trim();
+  if(val && val.includes('maps')){
+    document.getElementById('ubic-sin').style.display = 'flex';
+    document.getElementById('ubic-con').style.display = 'none';
+    // Show a small confirmation
+    document.getElementById('r-maps-lat').value = '';
+    document.getElementById('r-maps-lng').value = '';
+    // Show confirmed state using the pasted URL
+    document.getElementById('ubic-coords-txt').textContent = 'Link de Google Maps guardado';
+    document.getElementById('ubic-preview-link').href = val;
+    document.getElementById('ubic-sin').style.display = 'none';
+    document.getElementById('ubic-con').style.display = 'block';
+  }
+}
+
+function quitarUbicacion(){
+  document.getElementById('r-maps-lat').value = '';
+  document.getElementById('r-maps-lng').value = '';
+  document.getElementById('r-maps').value = '';
+  document.getElementById('ubic-sin').style.display = 'flex';
+  document.getElementById('ubic-con').style.display = 'none';
+}
+
+function previsualizarLogo(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    document.getElementById('r-logo-base64').value = e.target.result;
+    document.getElementById('logo-preview-img').src = e.target.result;
+    document.getElementById('logo-preview-wrap').style.display = 'block';
+    document.getElementById('logo-upload-btn').style.display = 'none';
+    document.getElementById('r-emoji').style.opacity = '.4';
+  };
+  reader.readAsDataURL(file);
+}
+
+function quitarLogo(){
+  document.getElementById('r-logo-base64').value = '';
+  const img = document.getElementById('logo-preview-img');
+  if(img) img.src='';
+  const wrap = document.getElementById('logo-preview-wrap');
+  if(wrap) wrap.style.display='none';
+  const btn = document.getElementById('logo-upload-btn');
+  if(btn) btn.style.display='flex';
+  const emoji = document.getElementById('r-emoji');
+  if(emoji) emoji.style.opacity='1';
+  const fileInput = document.getElementById('r-logo-file');
+  if(fileInput) fileInput.value='';
+}
+
+function publicarMenu(){
+  if(!negSesion){ alert('Sesión expirada. Volvé a iniciar sesión.'); return; }
+
+  const negId = negSesion.id;
+  const tipo = negSesion.tipo || 'almuerzo';
+  const hoy = new Date().toLocaleDateString('es-BO',{weekday:'long',day:'numeric',month:'long'});
+
+  if(tipo === 'almuerzo'){
+    // ALMUERZO
+    // ── ALMUERZO ──
+    const sopa = (document.getElementById('m-sopa')||{}).value||'';
+    const acomp = (document.getElementById('m-acomp')||{}).value||'';
+    const bebida = (document.getElementById('m-bebida')||{}).value||'';
+    const precioCompleto = parseInt((document.getElementById('m-precio-completo')||{}).value)||0;
+    const precioSegundo = parseInt((document.getElementById('m-precio-segundo')||{}).value)||0;
+    const precioSopa = parseInt((document.getElementById('m-precio-sopa')||{}).value)||0;
+
+    const sfRows = document.querySelectorAll('#seg-inputs .sf-row');
+    const segundos = [];
+    sfRows.forEach(function(row){
+      const emoji = (row.querySelector('.sf-emoji')||{}).value||'🍛';
+      const nombre = (row.querySelector('.sf-input')||{}).value||'';
+      if(nombre.trim()) segundos.push({emoji:emoji.trim()||'🍛', nombre:nombre.trim()});
+    });
+    if(segundos.length===0){ alert('Por favor ingresá al menos un segundo plato.'); return; }
+
+    const menuDia = {
+      fecha: 'Hoy, '+hoy,
+      sopa: {nombre:sopa.trim()||'Sopa del día', emoji:'🍲'},
+      segundos,
+      acompanamiento: {nombre:acomp.trim()||'', emoji:'🥗'},
+      bebida: {nombre:bebida.trim()||'', emoji:'🥤'},
+      precios: {completo:precioCompleto, soloSegundo:precioSegundo, soloSopa:precioSopa}
+    };
+
+    guardarMenuNegocio(negId, 'menuDia', menuDia);
+
+  } else {
+    // ── COMIDA RÁPIDA / POSTRES ──
+    const filas = document.querySelectorAll('#platos-inputs .plato-row');
+    const items = [];
+    filas.forEach(function(row, i){
+      const emojiEl = row.querySelector('.plato-emoji-input')||row.querySelector('.sf-emoji');
+      const emoji = emojiEl ? emojiEl.value.trim() : '🍽️';
+      const nombre = (row.querySelector('.plato-nombre')||{}).value||'';
+      const desc = (row.querySelector('.plato-desc')||{}).value||'';
+      const precio = parseInt((row.querySelector('.plato-precio')||{}).value)||0;
+      const fotoInput = row.querySelector('.plato-foto-input');
+      const foto = fotoInput ? (fotoInput.getAttribute('data-base64')||'') : '';
+      if(nombre.trim()) items.push({id:Date.now()+i, emoji:emoji||'🍽️', foto, nombre:nombre.trim(), desc:desc.trim(), precio});
+    });
+    if(items.length===0){ alert('Por favor ingresá al menos un plato con nombre.'); return; }
+
+    const catNombre = (document.getElementById('r-categoria')||{}).value||'🍽️ Menú';
+
+    const nuevoMenu = [{cat: catNombre, items}];
+
+    guardarMenuNegocio(negId, 'menu', nuevoMenu);
+
+  }
+
+  cerrarSesionNeg();
+  renderGrid(getTodos());
+  alert('✅ ¡Publicado exitosamente! Ya está visible en el catálogo.');
+  irA('inicio');
+}
+
+function guardarMenuNegocio(negId, campo, valor){
+  const lista = getRegistrados();
+  const idx = lista.findIndex(n=>n.id===negId);
+  if(idx!==-1){
+    lista[idx][campo] = valor;
+    lista[idx].abierto = true;
+    guardarRegistrados(lista);
+  } else {
+    var menus = {};
+    try{ menus = JSON.parse(localStorage.getItem('cc_menus')||'{}'); }catch(e){ menus={}; }
+    menus[String(negId)] = valor;
+    localStorage.setItem('cc_menus', JSON.stringify(menus));
+  }
+}
+
+/* ══════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════ */
+const ADMIN_PASS='conce2024';
+let logoTaps=0, logoTimer=null;
+
+// Triple toque oculto en el logo para abrir login
+document.addEventListener('DOMContentLoaded', function(){
+  const logoEl = document.querySelector('.nav-logo');
+  if(logoEl) logoEl.addEventListener('click',()=>{
+    logoTaps++;
+    clearTimeout(logoTimer);
+    logoTimer=setTimeout(()=>{ logoTaps=0; },800);
+    if(logoTaps>=3){
+      logoTaps=0;
+      document.getElementById('admin-login').classList.remove('hidden');
+    }
+  });
+});
+
+function loginAdmin(){
+  const pass=document.getElementById('admin-pass').value;
+  if(pass===ADMIN_PASS){
+    document.getElementById('admin-login').classList.add('hidden');
+    document.getElementById('admin-pass').value='';
+    document.getElementById('login-error').style.display='none';
+    document.getElementById('app-cliente').classList.add('hidden');
+    document.getElementById('app-admin').classList.remove('hidden');
+    renderAdminTodos();
+    actualizarStats();
+    cargarQRsAdmin();
+    // Cargar WSP admin guardado
+    const wspGuardado = localStorage.getItem('cc_admin_wsp');
+    if(wspGuardado) document.getElementById('admin-wsp-input').value='+'+wspGuardado;
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+function salirAdmin(){
+  document.getElementById('app-admin').classList.add('hidden');
+  document.getElementById('app-cliente').classList.remove('hidden');
+}
+
+function guardarAdminWSP(){
+  const wspRaw2 = document.getElementById('admin-wsp-input').value.trim().replace(/\D/g,'');
+  if(!wspRaw2){ alert('Ingresá un número válido.'); return; }
+  const wsp = wspRaw2.startsWith('591') ? wspRaw2 : '591' + wspRaw2;
+  localStorage.setItem('cc_admin_wsp', wsp);
+  alert('✅ Número guardado. Los comprobantes llegarán a +'+wsp);
+}
+
+function renderAdminNuevos(){
+  const reg=getRegistrados();
+  const tabla=document.getElementById('adm-tabla-nuevos');
+  if(!tabla) return;
+  if(!reg.length){
+    tabla.innerHTML='<div style="padding:12px 14px;font-size:.82rem;color:var(--texto-gris)">Sin nuevos registros aún.</div>';
+    return;
+  }
+  tabla.innerHTML=`
+    <div class="ath"><span>Negocio</span><span>Tipo</span><span>Estado</span><span>Acción</span></div>
+    ${reg.map(n=>`
+      <div class="atr">
+        <span style="font-weight:600">${n.emoji} ${n.nombre}<br><small style="color:var(--texto-gris);font-weight:400">${n.wsp?'📱 '+n.wsp.slice(-8):''}</small></span>
+        <span>${n.tipo==='almuerzo'?'Almuerzo':n.tipo==='postres'?'Postres':'Rápida'}</span>
+        <span class="sbadge s-pr">Prueba · vence ${n.fechaVence}</span>
+        <button class="btn-sm rojo" onclick="eliminarNegocio(${n.id})">Eliminar</button>
+      </div>`).join('')}`;
+  actualizarStats();
+}
+
+// Guardar socios de negocios demo en localStorage separado
+function getSociosDemo(){ try{return JSON.parse(localStorage.getItem('cc_socios_demo')||'{}');}catch(e){return{};} }
+function guardarSociosDemo(obj){ localStorage.setItem('cc_socios_demo',JSON.stringify(obj)); }
+
+function toggleSocio(id){
+  // Check if demo or registered
+  const isDemo = NEGOCIOS_DEMO.some(n=>n.id===id);
+
+  if(isDemo){
+    const socios = getSociosDemo();
+    socios[id] = !socios[id];
+    guardarSociosDemo(socios);
+    const neg = NEGOCIOS_DEMO.find(n=>n.id===id);
+    const esSocio = socios[id];
+    alert(esSocio ? '⭐ '+neg.nombre+' ahora es socio permanente.' : neg.nombre+' ya no es socio.');
+  } else {
+    const lista = getRegistrados();
+    const idx = lista.findIndex(n=>n.id===id);
+    if(idx===-1) return;
+    lista[idx].socio = !lista[idx].socio;
+    if(lista[idx].socio){
+      lista[idx].estado = 'socio';
+      lista[idx].fechaVence = '01/01/2099';
+    } else {
+      lista[idx].estado = 'prueba';
+      lista[idx].fechaVence = new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('es-BO');
+    }
+    guardarRegistrados(lista);
+    const esSocio = lista[idx].socio;
+    alert(esSocio ? '⭐ '+lista[idx].nombre+' ahora es socio permanente.' : lista[idx].nombre+' ya no es socio.');
+  }
+
+  renderAdminDemo();
+  renderAdminNuevos();
+  actualizarStats();
+  renderGrid(getTodos());
+}
+
+function renderAdminDemo(){ renderAdminTodos(); }
+
+function renderAdminNuevos(){
+  // Kept for compatibility - now calls unified function
+  renderAdminTodos();
+}
+
+function renderAdminTodos(){
+  const tabla = document.getElementById('adm-tabla-todos');
+  if(!tabla) return;
+
+  const socios = getSociosDemo();
+  const registrados = getRegistrados();
+
+  // Render demo negocios
+  const demoHTML = NEGOCIOS_DEMO.map(n=>{
+    const esSocio = !!socios[n.id];
+    return `<div class="atr">
+      <span style="font-weight:600">${n.emoji} ${n.nombre}
+        ${esSocio?'<span style="background:#f4a261;color:#7a4800;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:6px;margin-left:3px">SOCIO</span>':''}
+      </span>
+      <span>${n.tipo==='almuerzo'?'Almuerzo':n.tipo==='postres'?'Postres':'Rápida'}</span>
+      <span class="sbadge ${esSocio?'s-act':n.estado==='prueba'?'s-pr':'s-act'}">
+        ${esSocio?'⭐ Socio permanente':n.estado==='prueba'?'Prueba':'Activo'}
+      </span>
+      <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
+        ${esSocio?'Quitar':'⭐ Socio'}
+      </button>
+    </div>`;
+  }).join('');
+
+  // Render registered negocios
+  const regHTML = registrados.length ? registrados.map(n=>{
+    const esSocio = !!n.socio;
+    const vencido = estaVencido(n);
+    return `<div class="atr">
+      <span style="font-weight:600">${n.emoji} ${n.nombre}
+        ${esSocio?'<span style="background:#f4a261;color:#7a4800;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:6px;margin-left:3px">SOCIO</span>':''}
+        <br><small style="color:var(--texto-gris);font-weight:400">${n.wsp?'📱 '+n.wsp.slice(-8):''}</small>
+      </span>
+      <span>${n.tipo==='almuerzo'?'Almuerzo':n.tipo==='postres'?'Postres':'Rápida'}</span>
+      <span class="sbadge ${esSocio?'s-act':vencido?'s-venc':n.estado==='activo_pago'?'s-act':'s-pr'}">
+        ${esSocio?'⭐ Socio permanente':vencido?'Vencido':n.estado==='activo_pago'?'Activo · vence '+n.fechaVence:'Prueba · vence '+n.fechaVence}
+      </span>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
+          ${esSocio?'Quitar':'⭐ Socio'}
+        </button>
+        <button class="btn-sm rojo" onclick="eliminarNegocio(${n.id})">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('') : '';
+
+  tabla.innerHTML = demoHTML + regHTML;
+  actualizarStats();
+}
+
+function eliminarNegocio(id){
+  if(!confirm('¿Eliminar este negocio del sistema?')) return;
+  const lista = getRegistrados();
+  const negocio = lista.find(n=>n.id===id);
+  // Guardar en historial antes de eliminar (para detectar reuso futuro)
+  if(negocio){
+    const hist = getHistorial();
+    // Solo guardar datos mínimos para la verificación
+    hist.push({
+      nombre: negocio.nombre,
+      wsp: negocio.wsp,
+      tipo: negocio.tipo,
+      fechaEliminado: new Date().toLocaleDateString('es-BO'),
+      motivo: 'eliminado_admin'
+    });
+    guardarHistorial(hist);
+  }
+  guardarRegistrados(lista.filter(n=>n.id!==id));
+  renderAdminNuevos();
+  actualizarStats();
+  renderGrid(getTodos());
+}
+
+// Enter en password - wrapped safely
+document.addEventListener('DOMContentLoaded', function(){
+  const adminPass = document.getElementById('admin-pass');
+  if(adminPass) adminPass.addEventListener('keydown',e=>{ if(e.key==='Enter') loginAdmin(); });
+  const claveNeg = document.getElementById('login-clave-neg');
+  if(claveNeg) claveNeg.addEventListener('keydown',e=>{ if(e.key==='Enter') loginNegocio(); });
+});
+
+/* ══════════════════════════════════════════
+   SISTEMA DE PAGO Y MEMBRESÍA
+══════════════════════════════════════════ */
+let planPagoSeleccionado = null;
+let comprobanteBase64 = null;
+let negPagando = null;
+
+// Guardar/obtener QR del admin
+function getQRs(){ try{return JSON.parse(localStorage.getItem('cc_qrs')||'{}');}catch(e){return{};} }
+function guardarQR(tipo, base64){ const q=getQRs(); q[tipo]=base64; localStorage.setItem('cc_qrs',JSON.stringify(q)); }
+
+// Admin sube QR
+function subirQR(input, tipo){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    guardarQR(tipo, e.target.result);
+    const prev = document.getElementById(tipo+'-preview');
+    const txt = document.getElementById(tipo+'-txt');
+    if(prev) prev.innerHTML = '<img src="'+e.target.result+'" style="width:100%;border-radius:8px">';
+    if(txt) txt.style.display='none';
+    alert('✅ QR guardado correctamente.');
+  };
+  reader.readAsDataURL(file);
+}
+
+// Mostrar QRs en admin al cargar
+function cargarQRsAdmin(){
+  const qrs = getQRs();
+  if(qrs.qr10){
+    const p=document.getElementById('qr10-preview');
+    if(p) p.innerHTML='<img src="'+qrs.qr10+'" style="width:100%;border-radius:8px">';
+  }
+  if(qrs.qr15){
+    const p=document.getElementById('qr15-preview');
+    if(p) p.innerHTML='<img src="'+qrs.qr15+'" style="width:100%;border-radius:8px">';
+  }
+}
+
+// Verificar si un negocio está vencido
+function estaVencido(neg){
+  if(!neg.fechaVence) return false;
+  if(neg.estado==='activo_pago') return false;
+  if(neg.estado==='socio' || neg.socio) return false; // socios nunca vencen
+  const sociosDemo = getSociosDemo();
+  if(sociosDemo[neg.id]) return false; // demo marcado como socio
+  // Parsear fecha boliviana dd/mm/yyyy
+  const partes = neg.fechaVence.split('/');
+  if(partes.length===3){
+    const fechaVence = new Date(parseInt(partes[2]), parseInt(partes[1])-1, parseInt(partes[0]));
+    return new Date() > fechaVence;
+  }
+  return false;
+}
+
+// Mostrar pantalla de pago
+function mostrarPago(neg){
+  negPagando = neg;
+  planPagoSeleccionado = neg.tipo || 'almuerzo';
+  comprobanteBase64 = null;
+
+  // Pre-seleccionar plan según tipo del negocio
+  document.getElementById('plan-pago-almuerzo').classList.remove('sel');
+  document.getElementById('plan-pago-rapida').classList.remove('sel');
+  document.getElementById('plan-pago-'+(neg.tipo||'almuerzo')).classList.add('sel');
+
+  // Mostrar QR del plan
+  mostrarQRPlan(neg.tipo||'almuerzo');
+
+  // Reset steps
+  document.getElementById('pago-step-1').style.display='block';
+  document.getElementById('pago-step-2').style.display='none';
+  const prev = document.getElementById('comprobante-preview');
+  if(prev){ prev.src=''; }
+  const box = document.getElementById('comprobante-box');
+  if(box) box.style.display='none';
+  const btn = document.getElementById('btn-activar');
+  if(btn){ btn.disabled=true; btn.style.background='#aaa'; btn.style.cursor='not-allowed'; }
+  document.getElementById('qr-display').style.display='none';
+  const noPlan = document.getElementById('qr-no-plan');
+  if(noPlan) noPlan.style.display='block';
+  // Reset plan selection
+  ['almuerzo','rapida'].forEach(function(t){
+    var el = document.getElementById('plan-pago-'+t);
+    if(el){ el.style.borderColor='#e5e7eb'; el.style.background='#fff'; }
+  });
+
+  document.getElementById('pago-overlay').classList.remove('hidden');
+}
+
+function selPlanPago(tipo){
+  planPagoSeleccionado = tipo;
+  // Reset both
+  ['almuerzo','rapida'].forEach(function(t){
+    var el = document.getElementById('plan-pago-'+t);
+    if(el){ el.style.borderColor='#e5e7eb'; el.style.background='#fff'; }
+  });
+  // Highlight selected
+  var sel = document.getElementById('plan-pago-'+tipo);
+  if(sel){ sel.style.borderColor='#2d6a4f'; sel.style.background='#d8f3dc'; }
+  mostrarQRPlan(tipo);
+}
+
+function mostrarQRPlan(tipo){
+  const qrs = getQRs();
+  const key = tipo==='almuerzo'?'qr15':'qr20';
+  const monto = tipo==='almuerzo'?'Bs 10':'Bs 15';
+  const container = document.getElementById('qr-img-container');
+  const montoEl = document.getElementById('qr-monto-txt');
+  const noPlan = document.getElementById('qr-no-plan');
+  document.getElementById('qr-display').style.display='block';
+  if(noPlan) noPlan.style.display='none';
+  if(montoEl) montoEl.textContent = monto + '/mes';
+  if(qrs[key]){
+    container.innerHTML='<img src="'+qrs[key]+'" style="width:100%;height:100%;object-fit:contain" alt="QR de pago">';
+  } else {
+    container.innerHTML='<div class="qr-no-config">El admin aún no cargó el QR.<br>Contactalo por WhatsApp.</div>';
+  }
+}
+
+function previsualizarComprobante(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    comprobanteBase64 = e.target.result;
+    const prev = document.getElementById('comprobante-preview');
+    const box = document.getElementById('comprobante-box');
+    if(prev){ prev.src = e.target.result; }
+    if(box){ box.style.display='block'; }
+    const btn = document.getElementById('btn-activar');
+    if(btn){ btn.disabled=false; btn.style.background='#2d6a4f'; btn.style.cursor='pointer'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+function activarConComprobante(){
+  if(!negPagando || !comprobanteBase64){ alert('Por favor subí el comprobante de pago.'); return; }
+
+  const monto = planPagoSeleccionado==='almuerzo' ? 'Bs 15' : 'Bs 20';
+  const nuevaFechaVence = new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('es-BO');
+
+  // Activar el negocio en localStorage
+  const lista = getRegistrados();
+  const idx = lista.findIndex(n=>n.id===negPagando.id);
+  if(idx!==-1){
+    lista[idx].estado = 'activo_pago';
+    lista[idx].fechaVence = nuevaFechaVence;
+    lista[idx].ultimoPago = new Date().toLocaleDateString('es-BO');
+    lista[idx].planPago = planPagoSeleccionado;
+    guardarRegistrados(lista);
+  }
+
+  // Enviar comprobante al admin por WhatsApp
+  // Como no podemos enviar imagen directo por wa.me, enviamos texto con aviso
+  const adminWSP = localStorage.getItem('cc_admin_wsp') || '59170000000';
+  const msg = encodeURIComponent(
+    '💳 *COMPROBANTE DE PAGO - ComidaConce*\n\n' +
+    '🏪 Negocio: *' + negPagando.nombre + '*\n' +
+    '📱 Celular: ' + negPagando.wsp.slice(-8) + '\n' +
+    '💰 Plan: ' + monto + '/mes (' + (planPagoSeleccionado==='almuerzo'?'Almuerzo Diario':'Comida Rápida') + ')\n' +
+    '📅 Fecha: ' + new Date().toLocaleDateString('es-BO') + '\n' +
+    '✅ Membresía activada hasta: ' + nuevaFechaVence + '\n\n' +
+    '⚠️ Verificar comprobante. Si es falso, eliminar desde el panel admin.'
+  );
+  window.open('https://wa.me/'+adminWSP+'?text='+msg, '_blank');
+
+  // Mostrar step 2 (éxito)
+  document.getElementById('pago-step-1').style.display='none';
+  document.getElementById('pago-step-2').style.display='block';
+
+  // Actualizar grid
+  renderGrid(getTodos());
+  actualizarStats();
+}
+
+function cerrarPago(){
+  document.getElementById('pago-overlay').classList.add('hidden');
+  negPagando = null;
+  comprobanteBase64 = null;
+  planPagoSeleccionado = null;
+  irA('inicio');
+}
+
+// Verificar vencimiento al ver un negocio (si el dueño está logueado)
+// También se puede llamar manualmente
+function verificarVencimiento(neg){
+  if(estaVencido(neg)){
+    mostrarPago(neg);
+    return true;
+  }
+  return false;
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function(){
+  const fechaDia = document.getElementById('fecha-dia');
+  if(fechaDia) fechaDia.value = new Date().toISOString().split('T')[0];
+  renderGrid(getTodos());
+  actualizarStats();
+  poblarSelectMenu();
+});
+</script>
+</body>
+</html>
