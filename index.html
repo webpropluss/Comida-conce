@@ -906,20 +906,20 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div>
           <div style="font-size:.82rem;font-weight:700;color:var(--verde);margin-bottom:6px">QR — Bs 15/mes (Almuerzo)</div>
-          <div style="border:1.5px solid var(--borde);border-radius:10px;padding:10px;text-align:center;background:var(--crema)" id="qr10-preview">
-            <div style="font-size:.78rem;color:var(--texto-gris)" id="qr10-txt">Sin QR cargado</div>
+          <div style="border:1.5px solid var(--borde);border-radius:12px;padding:8px;text-align:center;background:var(--crema);min-height:80px;display:flex;align-items:center;justify-content:center" id="qr15-preview">
+            <div style="font-size:.75rem;color:var(--texto-gris)" id="qr15-txt">Sin QR cargado</div>
           </div>
-          <label style="display:block;margin-top:8px;background:var(--verde);color:#fff;border-radius:8px;padding:6px 10px;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer">
-            📷 Subir QR Bs 10<input type="file" accept="image/*" style="display:none" onchange="subirQR(this,'qr20')">
+          <label style="display:block;margin-top:8px;background:var(--verde);color:#fff;border-radius:8px;padding:8px 10px;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer">
+            📷 Subir QR Bs 15<input type="file" accept="image/*" style="display:none" onchange="subirQR(this,'qr15')">
           </label>
         </div>
         <div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--naranja);margin-bottom:6px">QR — Bs 20/mes (Rápida)</div>
-          <div style="border:1.5px solid var(--borde);border-radius:10px;padding:10px;text-align:center;background:var(--crema)" id="qr15-preview">
-            <div style="font-size:.78rem;color:var(--texto-gris)" id="qr15-txt">Sin QR cargado</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--naranja);margin-bottom:6px">QR — Bs 20/mes (Rápida/Postres)</div>
+          <div style="border:1.5px solid var(--borde);border-radius:12px;padding:8px;text-align:center;background:var(--crema);min-height:80px;display:flex;align-items:center;justify-content:center" id="qr20-preview">
+            <div style="font-size:.75rem;color:var(--texto-gris)" id="qr20-txt">Sin QR cargado</div>
           </div>
-          <label style="display:block;margin-top:8px;background:var(--naranja);color:#fff;border-radius:8px;padding:6px 10px;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer">
-            📷 Subir QR Bs 15<input type="file" accept="image/*" style="display:none" onchange="subirQR(this,'qr20')">
+          <label style="display:block;margin-top:8px;background:var(--naranja);color:#fff;border-radius:8px;padding:8px 10px;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer">
+            📷 Subir QR Bs 20<input type="file" accept="image/*" style="display:none" onchange="subirQR(this,'qr20')">
           </label>
         </div>
       </div>
@@ -946,6 +946,49 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
 
 <!-- ACCESO ADMIN OCULTO: triple toque en el logo -->
 <script>
+/* ══════════════════════════════════════════
+   FIREBASE CONFIG
+══════════════════════════════════════════ */
+// Firebase SDK
+const _fbScript = document.createElement('script');
+_fbScript.type = 'module';
+_fbScript.textContent = `
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+  import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, getDoc }
+    from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBHSG-R4PtgKgW1WkcWaN2pGCMDqhVHsRY",
+    authDomain: "comida-conce-70140.firebaseapp.com",
+    projectId: "comida-conce-70140",
+    storageBucket: "comida-conce-70140.appspot.com",
+    messagingSenderId: "29587731049",
+    appId: "1:29587731049:web:97f6c86fa9b8e8f1234567"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window._db = db;
+  window._fbReady = true;
+  window._col = collection;
+  window._doc = doc;
+  window._getDocs = getDocs;
+  window._setDoc = setDoc;
+  window._deleteDoc = deleteDoc;
+  window._onSnapshot = onSnapshot;
+  window._getDoc = getDoc;
+  console.log('Firebase listo');
+
+  // Escuchar negocios en tiempo real
+  onSnapshot(collection(db, 'negocios'), function(snap){
+    window._negociosFS = [];
+    snap.forEach(function(d){ window._negociosFS.push({...d.data(), _fsId: d.id}); });
+    if(typeof renderGrid === 'function') renderGrid(getTodos());
+    if(typeof actualizarStats === 'function') actualizarStats();
+  });
+`;
+document.head.appendChild(_fbScript);
+
 /* ══════════════════════════════════════════
    DATOS
 ══════════════════════════════════════════ */
@@ -1138,6 +1181,49 @@ const NEGOCIOS_DEMO = [
       bebida:{nombre:'Jugo',emoji:'🥤'},
       precios:{completo:25,soloSegundo:20,soloSopa:8}
     }
+  },
+  {
+    id:11, tipo:'rapida', nombre:'Sanduchería El Gordo', emoji:'🥪',
+    desc:'Sándwiches y snacks para llevar, los mejores de la zona',
+    tags:['Sándwiches','Snacks','Rápido'],
+    horario:'08:00-20:00', abierto:true, premium:false, wsp:'59171100001', clave:'gordo123',
+    estado:'prueba', fechaVence:'01/02/2026', servicios:'recoger,domicilio',
+    menu:[{cat:'🥪 Sándwiches', items:[
+      {id:1101,nombre:'Sándwich de pollo',desc:'Pechuga, lechuga, tomate y mayonesa',precio:18,emoji:'🥪'},
+      {id:1102,nombre:'Sándwich mixto',desc:'Jamón, queso y huevo',precio:15,emoji:'🥪'},
+      {id:1103,nombre:'Club sándwich',desc:'Triple con tocino y aguacate',precio:25,emoji:'🥪'},
+    ]}]
+  },
+  {
+    id:12, tipo:'postres', nombre:'Heladería Lupita', emoji:'🍦',
+    desc:'Helados artesanales y postres fríos para el calor de Concepción',
+    tags:['Helados','Postres','Fríos'],
+    horario:'10:00-22:00', abierto:true, premium:false, wsp:'59171200001', clave:'lupita123',
+    estado:'prueba', fechaVence:'15/02/2026', servicios:'recoger',
+    menu:[{cat:'🍦 Helados & Postres', items:[
+      {id:1201,nombre:'Copa sencilla',desc:'1 bola a elección',precio:8,emoji:'🍦'},
+      {id:1202,nombre:'Copa doble',desc:'2 bolas con toppings',precio:14,emoji:'🍨'},
+      {id:1203,nombre:'Banana split',desc:'Plátano, 3 bolas y crema',precio:22,emoji:'🍌'},
+      {id:1204,nombre:'Malteada',desc:'Chocolate, vainilla o fresa',precio:18,emoji:'🥤'},
+    ]}]
+  },
+  {
+    id:13, tipo:'almuerzo', nombre:'Comedor Don Ceferino', emoji:'🍽️',
+    desc:'Almuerzo del campo, sazón cruceño de verdad',
+    tags:['Cruceño','Casero','Almuerzo'],
+    horario:'11:00-14:30', abierto:true, premium:false, wsp:'59171300001', clave:'ceferino123',
+    estado:'prueba', fechaVence:'10/02/2026', servicios:'recoger,mesa',
+    menuDia:{
+      fecha:'Hoy',
+      sopa:{nombre:'Caldo de gallina criolla',emoji:'🍗'},
+      segundos:[
+        {nombre:'Locro de gallina',emoji:'🍲'},
+        {nombre:'Arroz con chancho frito',emoji:'🐷'},
+      ],
+      acompanamiento:{nombre:'Yuca cocida',emoji:'🍠'},
+      bebida:{nombre:'Chicha de maíz',emoji:'🍵'},
+      precios:{completo:25,soloSegundo:20,soloSopa:8}
+    }
   }
 ];
 
@@ -1147,20 +1233,43 @@ const NEGOCIOS_DEMO = [
 let carrito=[], negActual=null, almState={};
 
 /* ── localStorage ── */
-function getRegistrados(){ try{return JSON.parse(localStorage.getItem('cc_negocios')||'[]');}catch(e){return[];} }
-function guardarRegistrados(l){ localStorage.setItem('cc_negocios',JSON.stringify(l)); }
+function getRegistrados(){
+  // Usar datos de Firestore si están disponibles, sino localStorage
+  if(window._negociosFS && window._negociosFS.length > 0){
+    return window._negociosFS;
+  }
+  try{return JSON.parse(localStorage.getItem('cc_negocios')||'[]');}catch(e){return[];}
+}
+
+function guardarRegistrados(l){
+  // Guardar en localStorage siempre
+  localStorage.setItem('cc_negocios',JSON.stringify(l));
+  // Guardar en Firestore si está disponible
+  if(window._db && window._fbReady){
+    l.forEach(function(neg){
+      var negId = String(neg.id);
+      window._setDoc(window._doc(window._db,'negocios',negId), neg)
+        .then(function(){ console.log('Guardado en Firebase:', neg.nombre); })
+        .catch(function(e){ console.error('Error Firebase:', e); });
+    });
+  }
+}
 function getHistorial(){ try{return JSON.parse(localStorage.getItem('cc_historial')||'[]');}catch(e){return[];} }
 function guardarHistorial(l){ localStorage.setItem('cc_historial',JSON.stringify(l)); }
 function getTodos(){
   var menus = {};
   try{ menus = JSON.parse(localStorage.getItem('cc_menus')||'{}'); }catch(e){ menus={}; }
   var socios = getSociosDemo();
-  const demos = NEGOCIOS_DEMO.map(function(n){
-    var extra = {};
-    if(menus[String(n.id)]) extra.menuDia = menus[String(n.id)];
-    if(socios[n.id]) extra.socio = true;
-    return Object.assign({}, n, extra);
-  });
+  var eliminados = [];
+  try{ eliminados = JSON.parse(localStorage.getItem('cc_demos_eliminados')||'[]'); }catch(e){}
+  const demos = NEGOCIOS_DEMO
+    .filter(function(n){ return !eliminados.includes(n.id); })
+    .map(function(n){
+      var extra = {};
+      if(menus[String(n.id)]) extra.menuDia = menus[String(n.id)];
+      if(socios[n.id]) extra.socio = true;
+      return Object.assign({}, n, extra);
+    });
   return [...demos, ...getRegistrados()];
 }
 
@@ -1737,7 +1846,18 @@ function registrar(){
     }:null,
   };
 
-  const lista=getRegistrados(); lista.push(nuevo); guardarRegistrados(lista);
+  // Guardar en localStorage
+  const lista=getRegistrados().filter(function(n){ return !window._negociosFS || window._negociosFS.length===0; });
+  lista.push(nuevo);
+  localStorage.setItem('cc_negocios',JSON.stringify(lista));
+  // Guardar en Firestore
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'negocios',String(nuevo.id)), nuevo)
+      .then(function(){ console.log('Negocio registrado en Firebase'); })
+      .catch(function(e){ console.error('Error guardando en Firebase:', e); localStorage.setItem('cc_negocios', JSON.stringify([...getRegistrados(), nuevo])); });
+  } else {
+    const l2 = getRegistrados(); l2.push(nuevo); guardarRegistrados(l2);
+  }
   ['r-nombre','r-wsp','r-dir','r-maps','r-maps-lat','r-maps-lng','r-horario','r-hora-abre','r-hora-cierra','r-emoji','r-clave','r-logo-base64','r-servicios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   quitarUbicacion();
   selDias('ninguno');
@@ -2279,12 +2399,35 @@ function guardarMenuNegocio(negId, campo, valor){
   if(idx!==-1){
     lista[idx][campo] = valor;
     lista[idx].abierto = true;
-    guardarRegistrados(lista);
+    localStorage.setItem('cc_negocios', JSON.stringify(lista));
+    // Guardar en Firestore
+    if(window._db && window._fbReady){
+      var update = {abierto: true};
+      update[campo] = valor;
+      var ref = window._doc(window._db,'negocios',String(negId));
+      window._getDoc(ref).then(function(snap){
+        if(snap.exists()){
+          var data = snap.data();
+          data[campo] = valor;
+          data.abierto = true;
+          window._setDoc(ref, data)
+            .then(function(){ console.log('Menú actualizado en Firebase'); })
+            .catch(function(e){ console.error('Error:', e); });
+        }
+      });
+    }
   } else {
+    // Negocio demo - guardar menú separado
     var menus = {};
     try{ menus = JSON.parse(localStorage.getItem('cc_menus')||'{}'); }catch(e){ menus={}; }
     menus[String(negId)] = valor;
     localStorage.setItem('cc_menus', JSON.stringify(menus));
+    // En Firestore guardar en colección menus
+    if(window._db && window._fbReady){
+      window._setDoc(window._doc(window._db,'menus',String(negId)), {menuDia: valor, negId: negId})
+        .then(function(){ console.log('Menú demo guardado en Firebase'); })
+        .catch(function(e){ console.error('Error:', e); });
+    }
   }
 }
 
@@ -2364,6 +2507,18 @@ function renderAdminNuevos(){
 function getSociosDemo(){ try{return JSON.parse(localStorage.getItem('cc_socios_demo')||'{}');}catch(e){return{};} }
 function guardarSociosDemo(obj){ localStorage.setItem('cc_socios_demo',JSON.stringify(obj)); }
 
+function eliminarDemo(id){
+  if(!confirm('¿Eliminar este negocio demo del listado?')) return;
+  // Save deleted demo IDs in localStorage
+  var eliminados = [];
+  try{ eliminados = JSON.parse(localStorage.getItem('cc_demos_eliminados')||'[]'); }catch(e){}
+  if(!eliminados.includes(id)) eliminados.push(id);
+  localStorage.setItem('cc_demos_eliminados', JSON.stringify(eliminados));
+  renderAdminTodos();
+  actualizarStats();
+  renderGrid(getTodos());
+}
+
 function toggleSocio(id){
   // Check if demo or registered
   const isDemo = NEGOCIOS_DEMO.some(n=>n.id===id);
@@ -2413,19 +2568,26 @@ function renderAdminTodos(){
   const registrados = getRegistrados();
 
   // Render demo negocios
-  const demoHTML = NEGOCIOS_DEMO.map(n=>{
+  var eliminados = [];
+  try{ eliminados = JSON.parse(localStorage.getItem('cc_demos_eliminados')||'[]'); }catch(e){}
+  const demosVisibles = NEGOCIOS_DEMO.filter(function(n){ return !eliminados.includes(n.id); });
+  const demoHTML = demosVisibles.map(n=>{
     const esSocio = !!socios[n.id];
+    const vencido = estaVencido(n);
     return `<div class="atr">
       <span style="font-weight:600">${n.emoji} ${n.nombre}
         ${esSocio?'<span style="background:#f4a261;color:#7a4800;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:6px;margin-left:3px">SOCIO</span>':''}
       </span>
       <span>${n.tipo==='almuerzo'?'Almuerzo':n.tipo==='postres'?'Postres':'Rápida'}</span>
-      <span class="sbadge ${esSocio?'s-act':n.estado==='prueba'?'s-pr':'s-act'}">
-        ${esSocio?'⭐ Socio permanente':n.estado==='prueba'?'Prueba':'Activo'}
+      <span class="sbadge ${esSocio?'s-act':vencido?'s-venc':n.estado==='prueba'?'s-pr':'s-act'}">
+        ${esSocio?'⭐ Socio':vencido?'Vencido':n.estado==='prueba'?'Prueba':'Activo'}
       </span>
-      <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
-        ${esSocio?'Quitar':'⭐ Socio'}
-      </button>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
+          ${esSocio?'Quitar':'⭐ Socio'}
+        </button>
+        <button class="btn-sm rojo" onclick="eliminarDemo(${n.id})">Eliminar</button>
+      </div>
     </div>`;
   }).join('');
 
@@ -2472,8 +2634,15 @@ function eliminarNegocio(id){
     });
     guardarHistorial(hist);
   }
-  guardarRegistrados(lista.filter(n=>n.id!==id));
-  renderAdminNuevos();
+  const nuevaLista = lista.filter(n=>n.id!==id);
+  localStorage.setItem('cc_negocios', JSON.stringify(nuevaLista));
+  // Eliminar de Firestore
+  if(window._db && window._fbReady){
+    window._deleteDoc(window._doc(window._db,'negocios',String(id)))
+      .then(function(){ console.log('Eliminado de Firebase'); })
+      .catch(function(e){ console.error('Error eliminando:', e); });
+  }
+  renderAdminTodos();
   actualizarStats();
   renderGrid(getTodos());
 }
@@ -2503,26 +2672,21 @@ function subirQR(input, tipo){
   const reader = new FileReader();
   reader.onload = function(e){
     guardarQR(tipo, e.target.result);
-    const prev = document.getElementById(tipo+'-preview');
-    const txt = document.getElementById(tipo+'-txt');
-    if(prev) prev.innerHTML = '<img src="'+e.target.result+'" style="width:100%;border-radius:8px">';
-    if(txt) txt.style.display='none';
+    mostrarQREnAdmin(tipo, e.target.result);
     alert('✅ QR guardado correctamente.');
   };
   reader.readAsDataURL(file);
 }
 
-// Mostrar QRs en admin al cargar
+function mostrarQREnAdmin(tipo, src){
+  const prev = document.getElementById(tipo+'-preview');
+  if(prev) prev.innerHTML = '<img src="'+src+'" style="width:100%;border-radius:8px;display:block">';
+}
+
 function cargarQRsAdmin(){
   const qrs = getQRs();
-  if(qrs.qr10){
-    const p=document.getElementById('qr10-preview');
-    if(p) p.innerHTML='<img src="'+qrs.qr10+'" style="width:100%;border-radius:8px">';
-  }
-  if(qrs.qr15){
-    const p=document.getElementById('qr15-preview');
-    if(p) p.innerHTML='<img src="'+qrs.qr15+'" style="width:100%;border-radius:8px">';
-  }
+  if(qrs.qr15) mostrarQREnAdmin('qr15', qrs.qr15);
+  if(qrs.qr20) mostrarQREnAdmin('qr20', qrs.qr20);
 }
 
 // Verificar si un negocio está vencido
