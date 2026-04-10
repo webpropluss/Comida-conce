@@ -22,12 +22,12 @@ input,textarea,select{font-size:16px!important;}
   --radio:14px;--radio-lg:18px;--max:860px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--crema);color:var(--texto);min-height:100vh}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--crema);color:var(--texto);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
 .hidden{display:none!important}
 
 /* ── NAV CLIENTE ── */
-nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(27,67,50,.3)}
-.nav-inner{max-width:var(--max);margin:0 auto;padding:0 1.25rem;height:60px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(27,67,50,.3);padding-top:env(safe-area-inset-top)}
+.nav-inner{max-width:var(--max);margin:0 auto;padding:0 1.25rem;height:60px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-left:max(1.25rem, env(safe-area-inset-left));padding-right:max(1.25rem, env(safe-area-inset-right))}
 .nav-logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0}
 .nav-logo span{color:var(--amarillo)}
 .nav-btns{display:flex;gap:6px}
@@ -175,7 +175,7 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
 .wsp-link{display:flex;align-items:center;gap:7px;color:#25D366;font-weight:700;font-size:.86rem;text-decoration:none}
 
 /* ── CARRITO ── */
-.carrito-bar{position:fixed;bottom:0;left:0;right:0;background:var(--verde);color:#fff;padding:12px 1.25rem;display:flex;align-items:center;justify-content:space-between;z-index:200;transform:translateY(100%);transition:transform .3s;box-shadow:0 -3px 16px rgba(0,0,0,.2)}
+.carrito-bar{position:fixed;bottom:0;left:0;right:0;background:var(--verde);color:#fff;padding:12px 1.25rem;padding-bottom:calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;z-index:200;transform:translateY(100%);transition:transform .3s;box-shadow:0 -3px 16px rgba(0,0,0,.2)}
 .carrito-bar.show{transform:translateY(0)}
 .c-info strong{font-size:.98rem;margin-right:6px}
 .c-info span{font-size:.82rem;opacity:.85}
@@ -240,7 +240,7 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
 .btn-naranja:hover{background:var(--naranja-oscuro)}
 
 /* ── PANEL ADMIN ── */
-.admin-nav{background:var(--verde-oscuro);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-nav{background:var(--verde-oscuro);color:#fff;padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top);height:calc(56px + env(safe-area-inset-top))}
 .admin-nav-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:900}
 .admin-nav-title span{color:var(--amarillo);font-size:.75rem;font-weight:600;margin-left:8px;background:rgba(244,162,97,.2);padding:2px 8px;border-radius:10px}
 .admin-wrap{padding:1.25rem;max-width:var(--max);margin:0 auto}
