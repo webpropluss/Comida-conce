@@ -1012,9 +1012,36 @@ _fbScript.textContent = `
       const wsp = snap.data().adminWSP;
       localStorage.setItem('cc_admin_wsp', wsp);
       window._adminWSP = wsp;
-      // Actualizar input si admin está abierto
       const inp = document.getElementById('admin-wsp-input');
       if(inp) inp.value = wsp.slice(-8);
+    }
+  });
+
+  // Cargar activaciones de demos desde Firestore
+  onSnapshot(collection(db, 'activaciones'), function(snap){
+    var acts = {};
+    try{ acts = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+    snap.forEach(function(d){ acts[d.id] = d.data(); });
+    localStorage.setItem('cc_activaciones', JSON.stringify(acts));
+    if(typeof renderGrid === 'function') renderGrid(getTodos());
+    if(typeof renderAdminTodos === 'function') renderAdminTodos();
+  });
+
+  // Sincronizar socios en tiempo real
+  onSnapshot(doc(db, 'config', 'socios'), function(snap){
+    if(snap.exists()){
+      localStorage.setItem('cc_socios_demo', JSON.stringify(snap.data()));
+      if(typeof renderGrid === 'function') renderGrid(getTodos());
+      if(typeof renderAdminTodos === 'function') renderAdminTodos();
+    }
+  });
+
+  // Sincronizar demos eliminados en tiempo real
+  onSnapshot(doc(db, 'config', 'demos_eliminados'), function(snap){
+    if(snap.exists() && snap.data().ids){
+      localStorage.setItem('cc_demos_eliminados', JSON.stringify(snap.data().ids));
+      if(typeof renderGrid === 'function') renderGrid(getTodos());
+      if(typeof renderAdminTodos === 'function') renderAdminTodos();
     }
   });
 
@@ -2577,30 +2604,38 @@ function guardarSociosDemo(obj){ localStorage.setItem('cc_socios_demo',JSON.stri
 
 function eliminarDemo(id){
   if(!confirm('¿Eliminar este negocio demo del listado?')) return;
-  // Save deleted demo IDs in localStorage
   var eliminados = [];
   try{ eliminados = JSON.parse(localStorage.getItem('cc_demos_eliminados')||'[]'); }catch(e){}
   if(!eliminados.includes(id)) eliminados.push(id);
   localStorage.setItem('cc_demos_eliminados', JSON.stringify(eliminados));
+  // Guardar en Firestore
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'config','demos_eliminados'), {ids: eliminados})
+      .then(function(){ console.log('Demos eliminados guardados en Firebase'); });
+  }
   renderAdminTodos();
   actualizarStats();
   renderGrid(getTodos());
 }
 
 function toggleSocio(id){
-  // Check if demo or registered
-  const isDemo = NEGOCIOS_DEMO.some(n=>n.id===id);
+  const isDemo = NEGOCIOS_DEMO.some(function(n){ return n.id===id; });
 
   if(isDemo){
     const socios = getSociosDemo();
     socios[id] = !socios[id];
     guardarSociosDemo(socios);
-    const neg = NEGOCIOS_DEMO.find(n=>n.id===id);
+    const neg = NEGOCIOS_DEMO.find(function(n){ return n.id===id; });
     const esSocio = socios[id];
+    // Guardar en Firestore
+    if(window._db && window._fbReady){
+      window._setDoc(window._doc(window._db,'config','socios'), socios)
+        .then(function(){ console.log('Socios guardados en Firebase'); });
+    }
     alert(esSocio ? '⭐ '+neg.nombre+' ahora es socio permanente.' : neg.nombre+' ya no es socio.');
   } else {
     const lista = getRegistrados();
-    const idx = lista.findIndex(n=>n.id===id);
+    const idx = lista.findIndex(function(n){ return n.id===id; });
     if(idx===-1) return;
     lista[idx].socio = !lista[idx].socio;
     if(lista[idx].socio){
@@ -2610,13 +2645,12 @@ function toggleSocio(id){
       lista[idx].estado = 'prueba';
       lista[idx].fechaVence = new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('es-BO');
     }
-    guardarRegistrados(lista);
+    guardarRegistrados(lista); // ya guarda en Firestore
     const esSocio = lista[idx].socio;
     alert(esSocio ? '⭐ '+lista[idx].nombre+' ahora es socio permanente.' : lista[idx].nombre+' ya no es socio.');
   }
 
-  renderAdminDemo();
-  renderAdminNuevos();
+  renderAdminTodos();
   actualizarStats();
   renderGrid(getTodos());
 }
@@ -2798,9 +2832,21 @@ function cargarQRsAdmin(){
 function estaVencido(neg){
   if(!neg.fechaVence) return false;
   if(neg.estado==='activo_pago') return false;
-  if(neg.estado==='socio' || neg.socio) return false; // socios nunca vencen
+  if(neg.estado==='socio' || neg.socio) return false;
   const sociosDemo = getSociosDemo();
-  if(sociosDemo[neg.id]) return false; // demo marcado como socio
+  if(sociosDemo[neg.id]) return false;
+  // Verificar si fue activado via pago (demos o desde otro dispositivo)
+  var activaciones = {};
+  try{ activaciones = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+  if(activaciones[String(neg.id)]){
+    var act = activaciones[String(neg.id)];
+    // Parsear fecha de vencimiento de la activación
+    var partes2 = (act.fechaVence||'').split('/');
+    if(partes2.length===3){
+      var fv2 = new Date(parseInt(partes2[2]), parseInt(partes2[1])-1, parseInt(partes2[0]));
+      if(new Date() <= fv2) return false; // aún activo
+    }
+  }
   // Parsear fecha boliviana dd/mm/yyyy
   const partes = neg.fechaVence.split('/');
   if(partes.length===3){
@@ -2923,16 +2969,54 @@ function activarConComprobante(){
   const planLabel = planPagoSeleccionado==='almuerzo' ? 'Almuerzo Diario' : planPagoSeleccionado==='postres' ? 'Postres & Antojos' : 'Comida Rápida';
   const nuevaFechaVence = new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('es-BO');
 
-  // Activar el negocio en localStorage
-  const lista = getRegistrados();
-  const idx = lista.findIndex(n=>n.id===negPagando.id);
-  if(idx!==-1){
-    lista[idx].estado = 'activo_pago';
-    lista[idx].fechaVence = nuevaFechaVence;
-    lista[idx].ultimoPago = new Date().toLocaleDateString('es-BO');
-    lista[idx].planPago = planPagoSeleccionado;
-    guardarRegistrados(lista);
+  // Activar el negocio
+  const negId = String(negPagando.id);
+  const nuevaFechaVence_str = nuevaFechaVence;
+  const datosActivacion = {
+    estado: 'activo_pago',
+    fechaVence: nuevaFechaVence_str,
+    ultimoPago: new Date().toLocaleDateString('es-BO'),
+    planPago: planPagoSeleccionado
+  };
+
+  // 1. Intentar activar en Firestore (negocios registrados)
+  if(window._db && window._fbReady){
+    var ref = window._doc(window._db,'negocios',negId);
+    window._getDoc(ref).then(function(snap){
+      if(snap.exists()){
+        // Negocio registrado en Firestore
+        var data = snap.data();
+        Object.assign(data, datosActivacion);
+        window._setDoc(ref, data)
+          .then(function(){ console.log('Membresía activada en Firestore'); })
+          .catch(function(e){ console.error('Error Firestore:', e); });
+      } else {
+        // Negocio demo - guardar activación en colección 'activaciones'
+        window._setDoc(window._doc(window._db,'activaciones',negId), {
+          negId: negId,
+          nombre: negPagando.nombre,
+          ...datosActivacion
+        }).then(function(){ console.log('Activación demo guardada en Firestore'); });
+      }
+    });
   }
+
+  // 2. Actualizar localStorage también
+  const lista = getRegistrados();
+  const idx2 = lista.findIndex(function(n){ return String(n.id)===negId; });
+  if(idx2!==-1){
+    lista[idx2].estado = 'activo_pago';
+    lista[idx2].fechaVence = nuevaFechaVence_str;
+    lista[idx2].ultimoPago = new Date().toLocaleDateString('es-BO');
+    lista[idx2].planPago = planPagoSeleccionado;
+    localStorage.setItem('cc_negocios', JSON.stringify(lista));
+  }
+
+  // 3. Para demos: guardar activación local
+  var activaciones = {};
+  try{ activaciones = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+  activaciones[negId] = datosActivacion;
+  localStorage.setItem('cc_activaciones', JSON.stringify(activaciones));
 
   // Enviar comprobante al admin por WhatsApp
   // Como no podemos enviar imagen directo por wa.me, enviamos texto con aviso
