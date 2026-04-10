@@ -1006,6 +1006,18 @@ _fbScript.textContent = `
     }
   });
 
+  // Cargar WSP admin desde Firestore
+  getDoc(doc(db, 'config', 'admin')).then(function(snap){
+    if(snap.exists() && snap.data().adminWSP){
+      const wsp = snap.data().adminWSP;
+      localStorage.setItem('cc_admin_wsp', wsp);
+      window._adminWSP = wsp;
+      // Actualizar input si admin está abierto
+      const inp = document.getElementById('admin-wsp-input');
+      if(inp) inp.value = wsp.slice(-8);
+    }
+  });
+
   // Escuchar config en tiempo real (QRs del admin)
   onSnapshot(doc(db, 'config', 'qrs'), function(snap){
     if(snap.exists()){
@@ -1013,6 +1025,14 @@ _fbScript.textContent = `
       window._qrsFromFirebase = data;
       localStorage.setItem('cc_qrs', JSON.stringify(data));
       if(typeof cargarQRsAdmin === 'function') cargarQRsAdmin();
+    }
+  });
+
+  // Escuchar WSP admin en tiempo real
+  onSnapshot(doc(db, 'config', 'admin'), function(snap){
+    if(snap.exists() && snap.data().adminWSP){
+      window._adminWSP = snap.data().adminWSP;
+      localStorage.setItem('cc_admin_wsp', snap.data().adminWSP);
     }
   });
 
@@ -2517,7 +2537,18 @@ function guardarAdminWSP(){
   if(!wspRaw2){ alert('Ingresá un número válido.'); return; }
   const wsp = wspRaw2.startsWith('591') ? wspRaw2 : '591' + wspRaw2;
   localStorage.setItem('cc_admin_wsp', wsp);
-  alert('✅ Número guardado. Los comprobantes llegarán a +'+wsp);
+  // Guardar en Firestore para todos los dispositivos
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'config','admin'), {adminWSP: wsp})
+      .then(function(){ 
+        alert('✅ Número guardado en la nube. Los comprobantes llegarán a +'+wsp);
+      })
+      .catch(function(e){ 
+        alert('✅ Número guardado localmente: +'+wsp);
+      });
+  } else {
+    alert('✅ Número guardado: +'+wsp);
+  }
 }
 
 function renderAdminNuevos(){
@@ -2905,7 +2936,7 @@ function activarConComprobante(){
 
   // Enviar comprobante al admin por WhatsApp
   // Como no podemos enviar imagen directo por wa.me, enviamos texto con aviso
-  const adminWSP = localStorage.getItem('cc_admin_wsp') || '59170000000';
+  const adminWSP = window._adminWSP || localStorage.getItem('cc_admin_wsp') || '59170000000';
   const msg = encodeURIComponent(
     '💳 *COMPROBANTE DE PAGO - ComidaConce*\n\n' +
     '🏪 Negocio: *' + negPagando.nombre + '*\n' +
