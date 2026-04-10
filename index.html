@@ -766,8 +766,7 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
             <div id="qr-img-container" style="width:160px;height:160px;margin:0 auto;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center">
               <div style="font-size:.78rem;color:#6b7280;padding:.5rem;text-align:center;line-height:1.5">El admin aún no cargó el QR.<br>Contactalo por WhatsApp.</div>
             </div>
-            <div id="qr-monto-txt" style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;color:#2d6a4f;margin-top:.6rem">—</div>
-            <div style="font-size:.74rem;color:#6b7280;margin-top:2px">Pagá el monto exacto</div>
+
           </div>
 
           <!-- PASO 3: Comprobante -->
@@ -775,16 +774,28 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
 
           <!-- Botones para elegir fuente -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#d8f3dc;border:2px solid #52b788;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center">
+            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#d8f3dc;border:2px solid #52b788;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center" onclick="ocultarErrorPermiso()">
               <span style="font-size:1.4rem">🖼️</span>
               <span style="font-size:.8rem;font-weight:700;color:#2d6a4f">Desde fototeca</span>
-              <input type="file" accept="image/*" style="display:none" onchange="previsualizarComprobante(this)">
+              <input type="file" accept="image/*" style="display:none" onchange="previsualizarComprobante(this)" onclick="this.value=''">
             </label>
-            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fce4d6;border:2px solid #e76f51;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center">
+            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fce4d6;border:2px solid #e76f51;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center" onclick="ocultarErrorPermiso()">
               <span style="font-size:1.4rem">📷</span>
               <span style="font-size:.8rem;font-weight:700;color:#c1440e">Tomar foto</span>
-              <input type="file" accept="image/*" capture="environment" style="display:none" onchange="previsualizarComprobante(this)">
+              <input type="file" accept="image/*" capture="environment" style="display:none" onchange="previsualizarComprobante(this)" onclick="this.value=''">
             </label>
+          </div>
+
+          <!-- Error de permisos -->
+          <div id="permiso-error-box" style="display:none;background:#fee2e2;border:1.5px solid #ef4444;border-radius:12px;padding:12px 14px;margin-bottom:10px">
+            <div style="font-size:.88rem;font-weight:700;color:#991b1b;margin-bottom:4px">⚠️ Permiso denegado</div>
+            <div style="font-size:.82rem;color:#7f1d1d;line-height:1.5">
+              Tu navegador no tiene permiso para acceder a las fotos.<br><br>
+              <strong>En Android Chrome:</strong><br>
+              Tocá los 3 puntos ⋮ → Configuración → Privacidad → Configuración de sitios → Imágenes / Almacenamiento → Permitir<br><br>
+              <strong>En iPhone Safari:</strong><br>
+              Configuración → Safari → Cámara y Fotos → Permitir
+            </div>
           </div>
 
           <!-- Preview comprobante -->
@@ -2825,11 +2836,9 @@ function mostrarQRPlan(tipo){
   const key = tipo==='almuerzo'?'qr15':'qr20';
   const monto = tipo==='almuerzo'?'Bs 10':'Bs 15';
   const container = document.getElementById('qr-img-container');
-  const montoEl = document.getElementById('qr-monto-txt');
   const noPlan = document.getElementById('qr-no-plan');
   document.getElementById('qr-display').style.display='block';
   if(noPlan) noPlan.style.display='none';
-  if(montoEl) montoEl.textContent = monto + '/mes';
   if(qrs[key]){
     container.innerHTML='<img src="'+qrs[key]+'" style="width:100%;height:100%;object-fit:contain" alt="QR de pago">';
   } else {
@@ -2838,18 +2847,42 @@ function mostrarQRPlan(tipo){
 }
 
 function previsualizarComprobante(input){
-  const file = input.files[0]; if(!file) return;
+  // Verificar si el input tiene archivos (si no, permisos denegados)
+  if(!input || !input.files || input.files.length === 0){
+    mostrarErrorPermiso();
+    return;
+  }
+  const file = input.files[0];
+  if(!file){
+    mostrarErrorPermiso();
+    return;
+  }
   const reader = new FileReader();
   reader.onload = function(e){
     comprobanteBase64 = e.target.result;
     const prev = document.getElementById('comprobante-preview');
     const box = document.getElementById('comprobante-box');
+    const errBox = document.getElementById('permiso-error-box');
     if(prev){ prev.src = e.target.result; }
     if(box){ box.style.display='block'; }
+    if(errBox){ errBox.style.display='none'; }
     const btn = document.getElementById('btn-activar');
     if(btn){ btn.disabled=false; btn.style.background='#2d6a4f'; btn.style.cursor='pointer'; }
   };
+  reader.onerror = function(){
+    mostrarErrorPermiso();
+  };
   reader.readAsDataURL(file);
+}
+
+function ocultarErrorPermiso(){
+  const errBox = document.getElementById('permiso-error-box');
+  if(errBox) errBox.style.display='none';
+}
+
+function mostrarErrorPermiso(){
+  const errBox = document.getElementById('permiso-error-box');
+  if(errBox){ errBox.style.display='block'; }
 }
 
 function activarConComprobante(){
