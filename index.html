@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+input,textarea,select{font-size:16px!important;}
 :root{
   --verde:#2d6a4f;--verde-claro:#52b788;--verde-bg:#d8f3dc;--verde-oscuro:#1b4332;
   --naranja:#e76f51;--naranja-bg:#fce4d6;--naranja-oscuro:#c1440e;
@@ -210,7 +211,7 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
 .plan-precio{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:900;color:var(--verde);margin-top:5px}
 .fg{margin-bottom:.9rem}
 .fg label{display:block;font-size:.82rem;font-weight:600;margin-bottom:3px}
-.fg input,.fg textarea,.fg select{width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:.87rem;outline:none;transition:border .2s;background:#fff;color:var(--texto)}
+.fg input,.fg textarea,.fg select{width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:9px;font-family:inherit;font-size:16px;outline:none;transition:border .2s;background:#fff;color:var(--texto)}
 .fg input:focus,.fg textarea:focus{border-color:var(--verde)}
 .fg textarea{resize:vertical;min-height:75px}
 .btn-primary{width:100%;background:var(--verde);color:#fff;border:none;padding:13px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.4rem}
@@ -490,6 +491,22 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
         <div id="horario-preview" style="margin-top:8px;background:var(--crema);border-radius:9px;padding:8px 12px;font-size:.82rem;color:var(--verde);font-weight:600;display:none"></div>
         <input type="hidden" id="r-horario">
       </div>
+      <div class="fg">
+        <label>Servicios que ofrece</label>
+        <div style="font-size:.76rem;color:var(--texto-gris);margin-bottom:8px">Seleccioná uno o más — el cliente verá estas opciones al pedir</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="servicios-btns">
+          <button type="button" class="srv-btn" data-srv="recoger" onclick="toggleServicio(this)" style="display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;border:2px solid var(--borde);background:#fff;font-family:inherit;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .2s">
+            <span style="font-size:1.2rem">🏃</span> Recoger en local
+          </button>
+          <button type="button" class="srv-btn" data-srv="mesa" onclick="toggleServicio(this)" style="display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;border:2px solid var(--borde);background:#fff;font-family:inherit;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .2s">
+            <span style="font-size:1.2rem">🪑</span> Reserva mesa
+          </button>
+          <button type="button" class="srv-btn" data-srv="domicilio" onclick="toggleServicio(this)" style="display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;border:2px solid var(--borde);background:#fff;font-family:inherit;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .2s">
+            <span style="font-size:1.2rem">🛵</span> Envío a domicilio
+          </button>
+        </div>
+        <input type="hidden" id="r-servicios" value="">
+      </div>
       <div class="fg"><label>Descripción del negocio</label><textarea id="r-desc" placeholder="Describe tus platos, especialidades y lo que te hace único..."></textarea></div>
       <div class="fg">
         <label>Logo del negocio <span style="font-weight:400;color:var(--texto-gris)">(opcional)</span></label>
@@ -667,13 +684,18 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
         <input id="nombre-cliente" type="text" placeholder="Ej: Juan García" style="width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:10px;font-family:inherit;font-size:.88rem;outline:none">
       </div>
 
+      <!-- Tipo de servicio -->
+      <div id="modal-servicios-wrap" style="margin-bottom:.8rem;display:none">
+        <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px">🍽️ Tipo de servicio</label>
+        <div id="modal-servicios-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+      </div>
+
       <!-- Hora de recogida -->
-      <label style="font-size:.82rem;font-weight:600;display:block;margin-top:.7rem;margin-bottom:3px">⏰ Hora de recogida</label>
-      <select class="hora-sel" id="hora-recogida">
-        <option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option>
-        <option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option>
-        <option>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
-      </select>
+      <label style="font-size:.82rem;font-weight:600;display:block;margin-top:.7rem;margin-bottom:3px">⏰ Hora</label>
+      <select class="hora-sel" id="hora-recogida"></select>
+      <div id="hora-sin-opciones" style="display:none;background:var(--naranja-bg);border-radius:9px;padding:8px 12px;font-size:.82rem;color:var(--naranja-oscuro);margin-top:5px">
+        ⏰ El negocio está cerrado o ya no acepta pedidos por hoy.
+      </div>
     </div>
 
     <!-- BOTÓN FIJO ABAJO -->
@@ -932,16 +954,19 @@ const NEGOCIOS_DEMO = [
     id:1, tipo:'rapida', nombre:'Burgers Conce', emoji:'🍔',
     desc:'Las mejores hamburguesas artesanales de Concepción',
     tags:['Hamburguesas','Sándwiches','Papas fritas'],
-    horario:'11:00–22:00', abierto:true, premium:true, wsp:'59171234567',
+    horario:'11:00-22:00', abierto:true, premium:true, wsp:'59171234567', clave:'burger123',
+    estado:'activo', servicios:'recoger,domicilio',
     menu:[
       {cat:'🍔 Hamburguesas',items:[
         {id:101,nombre:'Burger Clásica',desc:'Carne, lechuga, tomate, queso',precio:25,emoji:'🍔'},
         {id:102,nombre:'Burger Doble',desc:'Doble carne, bacon, queso cheddar',precio:35,emoji:'🍔'},
         {id:103,nombre:'Burger Pollo',desc:'Pechuga apanada, salsa especial',precio:28,emoji:'🐔'},
+        {id:108,nombre:'Burger Veggie',desc:'Medallón de verduras, aguacate',precio:27,emoji:'🥗'},
       ]},
       {cat:'🍟 Acompañamientos',items:[
         {id:104,nombre:'Papas fritas',desc:'Crocantes con sal y salsas',precio:12,emoji:'🍟'},
         {id:105,nombre:'Salchipapas',desc:'Papas, salchicha y cremas',precio:18,emoji:'🍟'},
+        {id:109,nombre:'Aros de cebolla',desc:'Apanados y crocantes',precio:14,emoji:'🧅'},
       ]},
       {cat:'🥤 Bebidas',items:[
         {id:106,nombre:'Refresco',desc:'Coca-cola, Fanta, Sprite',precio:8,emoji:'🥤'},
@@ -953,9 +978,10 @@ const NEGOCIOS_DEMO = [
     id:2, tipo:'almuerzo', nombre:'Doña Carmen', emoji:'🥗',
     desc:'Almuerzo casero y nutritivo todos los días',
     tags:['Almuerzo','Casero','Sopas'],
-    horario:'11:30–14:30', abierto:true, premium:true, wsp:'59173688229', clave:'carmen123',
+    horario:'11:30-14:30', abierto:true, premium:true, wsp:'59173688229', clave:'carmen123',
+    estado:'activo', servicios:'recoger,mesa',
     menuDia:{
-      fecha:'Hoy, miércoles 8 de abril',
+      fecha:'Hoy',
       sopa:{nombre:'Sopa de maní',emoji:'🍲'},
       segundos:[
         {nombre:'Arroz con pollo a la plancha',emoji:'🍗'},
@@ -964,27 +990,34 @@ const NEGOCIOS_DEMO = [
       ],
       acompanamiento:{nombre:'Ensalada fresca',emoji:'🥗'},
       bebida:{nombre:'Refresco del día',emoji:'🥤'},
-      precios:{completo:15,soloSegundo:12,soloSopa:5}
+      precios:{completo:25,soloSegundo:20,soloSopa:8}
     }
   },
   {
     id:3, tipo:'rapida', nombre:'Pollos El Chino', emoji:'🐔',
     desc:'Pollo frito y broaster estilo oriental',
     tags:['Pollo','Broaster','Familiar'],
-    horario:'12:00–21:00', abierto:true, premium:false, wsp:'59173456789',
+    horario:'12:00-21:00', abierto:true, premium:false, wsp:'59173456789', clave:'chino123',
+    estado:'prueba', fechaVence:'20/04/2026', servicios:'recoger,domicilio,mesa',
     menu:[{cat:'🐔 Pollos',items:[
       {id:201,nombre:'Pollo broaster 1/4',desc:'Con yuca frita y ensalada',precio:28,emoji:'🐔'},
       {id:202,nombre:'Pollo broaster 1/2',desc:'Con yuca frita y ensalada',precio:48,emoji:'🐔'},
       {id:203,nombre:'Combo familiar',desc:'1 pollo entero + 4 jugos + guarnición',precio:85,emoji:'🍗'},
+      {id:209,nombre:'Alitas BBQ x6',desc:'Con salsa BBQ y papas',precio:32,emoji:'🍗'},
+    ]},
+    {cat:'🍟 Extras',items:[
+      {id:204,nombre:'Yuca frita',desc:'Porción grande crocante',precio:10,emoji:'🍠'},
+      {id:205,nombre:'Refresco',desc:'Lata fría',precio:8,emoji:'🥤'},
     ]}]
   },
   {
     id:4, tipo:'almuerzo', nombre:'La Abuela', emoji:'🍲',
     desc:'Comida tradicional boliviana, recetas de siempre',
     tags:['Tradicional','Casero','Económico'],
-    horario:'11:00–14:00', abierto:false, premium:false, wsp:'59174567890', clave:'abuela123',
+    horario:'11:00-14:00', abierto:false, premium:false, wsp:'59174567890', clave:'abuela123',
+    estado:'prueba', fechaVence:'25/04/2026', servicios:'recoger',
     menuDia:{
-      fecha:'Hoy, miércoles 8 de abril',
+      fecha:'Hoy',
       sopa:{nombre:'Sopa de fideos con verduras',emoji:'🥣'},
       segundos:[
         {nombre:'Majao de charque',emoji:'🍛'},
@@ -992,65 +1025,40 @@ const NEGOCIOS_DEMO = [
       ],
       acompanamiento:{nombre:'Arroz blanco',emoji:'🍚'},
       bebida:{nombre:'Jugo de temporada',emoji:'🍹'},
-      precios:{completo:12,soloSegundo:10,soloSopa:5}
+      precios:{completo:25,soloSegundo:20,soloSopa:8}
     }
   },
   {
     id:5, tipo:'rapida', nombre:'Pizza Don Rafa', emoji:'🍕',
     desc:'Pizzas al horno de barro y pastas artesanales',
     tags:['Pizza','Pasta','Italiana'],
-    horario:'18:00–23:00', abierto:false, premium:true, wsp:'59175678901',
+    horario:'18:00-23:00', abierto:false, premium:true, wsp:'59175678901', clave:'rafa123',
+    estado:'activo', servicios:'recoger,domicilio',
     menu:[
       {cat:'🍕 Pizzas',items:[
         {id:301,nombre:'Pizza Margherita',desc:'Salsa, mozzarella, albahaca',precio:35,emoji:'🍕'},
         {id:302,nombre:'Pizza Especial',desc:'Jamón, champiñones, aceitunas, extra queso',precio:45,emoji:'🍕'},
         {id:303,nombre:'Pizza Familiar',desc:'Elige 2 sabores, tamaño grande',precio:65,emoji:'🍕'},
+        {id:306,nombre:'Pizza Hawaiana',desc:'Jamón y piña',precio:40,emoji:'🍕'},
       ]},
       {cat:'🍝 Pastas',items:[
         {id:304,nombre:'Spaghetti bolognesa',desc:'Carne molida, salsa casera',precio:30,emoji:'🍝'},
         {id:305,nombre:'Fettuccine Alfredo',desc:'Crema, parmesano, ajo',precio:32,emoji:'🍝'},
+      ]},
+      {cat:'🥤 Bebidas',items:[
+        {id:307,nombre:'Gaseosa 2L',desc:'Coca-cola o Sprite',precio:15,emoji:'🥤'},
+        {id:308,nombre:'Jugo natural',desc:'De la temporada',precio:12,emoji:'🍹'},
       ]}
     ]
-  },
-  {
-    id:8, tipo:'postres', nombre:'Fresas & Delicias', emoji:'🍓',
-    desc:'Fresas con crema, jugos naturales y antojos dulces',
-    tags:['Postres','Fresas','Jugos','Antojos'],
-    horario:'09:00–21:00', abierto:true, premium:false, wsp:'59178000001', clave:'fresas123',
-    estado:'prueba',
-    fechaRegistro:'09/04/2026',
-    fechaVence:'09/05/2026',
-    menu:[{cat:'🍓 Fresas & Postres', items:[
-      {id:801,nombre:'Fresas con crema',desc:'Fresas frescas con crema batida y miel',precio:15,emoji:'🍓'},
-      {id:802,nombre:'Fresas con chocolate',desc:'Bañadas en chocolate derretido',precio:18,emoji:'🍫'},
-      {id:803,nombre:'Jugo natural',desc:'Naranja, mango o maracuyá',precio:10,emoji:'🥤'},
-      {id:804,nombre:'Helado artesanal',desc:'3 sabores a elección',precio:12,emoji:'🍦'},
-    ]}]
-  },
-  {
-    id:7, tipo:'almuerzo', nombre:'Doña Pola', emoji:'🍱',
-    desc:'Almuerzo casero, menú del día variado',
-    tags:['Almuerzo','Casero'],
-    horario:'11:00–14:00', abierto:true, premium:false, wsp:'59177000001', clave:'pola123',
-    estado:'prueba',
-    fechaRegistro:'01/03/2026',
-    fechaVence:'01/03/2026',
-    menuDia:{
-      fecha:'Hoy',
-      sopa:{nombre:'Sopa de verduras',emoji:'🥣'},
-      segundos:[{nombre:'Arroz con carne',emoji:'🍛'}],
-      acompanamiento:{nombre:'Ensalada',emoji:'🥗'},
-      bebida:{nombre:'Jugo',emoji:'🥤'},
-      precios:{completo:13,soloSegundo:10,soloSopa:5}
-    }
   },
   {
     id:6, tipo:'almuerzo', nombre:'Menú El Rancho', emoji:'🤠',
     desc:'Almuerzo del llano, auténtico sabor cruceño',
     tags:['Cruceño','Almuerzo','Tradicional'],
-    horario:'11:00–14:30', abierto:true, premium:false, wsp:'59176789012', clave:'rancho123',
+    horario:'11:00-14:30', abierto:true, premium:false, wsp:'59176789012', clave:'rancho123',
+    estado:'vencido', fechaVence:'01/03/2026', servicios:'recoger,mesa',
     menuDia:{
-      fecha:'Hoy, miércoles 8 de abril',
+      fecha:'Hoy',
       sopa:{nombre:'Caldo de res',emoji:'🍜'},
       segundos:[
         {nombre:'Locro con yuca',emoji:'🍲'},
@@ -1059,7 +1067,76 @@ const NEGOCIOS_DEMO = [
       ],
       acompanamiento:{nombre:'Ensalada de tomate',emoji:'🥗'},
       bebida:{nombre:'Chicha morada',emoji:'🍵'},
-      precios:{completo:14,soloSegundo:11,soloSopa:5}
+      precios:{completo:25,soloSegundo:20,soloSopa:8}
+    }
+  },
+  {
+    id:8, tipo:'postres', nombre:'Fresas & Delicias', emoji:'🍓',
+    desc:'Fresas con crema, jugos naturales y antojos dulces',
+    tags:['Postres','Fresas','Jugos','Antojos'],
+    horario:'09:00-21:00', abierto:true, premium:false, wsp:'59178000001', clave:'fresas123',
+    estado:'prueba', fechaVence:'09/05/2026', servicios:'recoger,domicilio',
+    menu:[{cat:'🍓 Fresas & Postres', items:[
+      {id:801,nombre:'Fresas con crema',desc:'Fresas frescas con crema batida y miel',precio:15,emoji:'🍓'},
+      {id:802,nombre:'Fresas con chocolate',desc:'Bañadas en chocolate derretido',precio:18,emoji:'🍫'},
+      {id:803,nombre:'Fresas con leche condensada',desc:'Clásico irresistible',precio:15,emoji:'🍓'},
+      {id:807,nombre:'Copa de helado',desc:'3 bolas a elección con toppings',precio:18,emoji:'🍨'},
+      {id:808,nombre:'Brownie con helado',desc:'Tibio con helado de vainilla',precio:22,emoji:'🍫'},
+    ]},
+    {cat:'🥤 Jugos & Bebidas', items:[
+      {id:804,nombre:'Jugo natural',desc:'Naranja, mango o maracuyá',precio:10,emoji:'🥤'},
+      {id:805,nombre:'Batido de fresa',desc:'Con leche y helado',precio:15,emoji:'🍓'},
+      {id:806,nombre:'Limonada',desc:'Natural con menta',precio:10,emoji:'🍋'},
+    ]}]
+  },
+  {
+    id:9, tipo:'rapida', nombre:'Don Pilo Pollos', emoji:'🍗',
+    desc:'Pollo frito, broaster y parrilla al carbón',
+    tags:['Pollo','Parrilla','Broaster'],
+    horario:'12:00-22:00', abierto:true, premium:false, wsp:'59179000001', clave:'pilo123',
+    estado:'prueba', fechaVence:'15/04/2026', servicios:'recoger,domicilio',
+    menu:[{cat:'🍗 Pollos & Parrilla',items:[
+      {id:901,nombre:'1/4 pollo broaster',desc:'Con yuca y ensalada',precio:28,emoji:'🍗'},
+      {id:902,nombre:'1/2 pollo a la parrilla',desc:'Con chimichurri casero',precio:45,emoji:'🍗'},
+      {id:903,nombre:'Alitas x8',desc:'BBQ o picantes a elección',precio:35,emoji:'🍗'},
+      {id:904,nombre:'Pechuga a la plancha',desc:'Con arroz y verduras',precio:30,emoji:'🍗'},
+    ]},
+    {cat:'🍟 Acompañamientos',items:[
+      {id:905,nombre:'Yuca frita',desc:'Crocante',precio:10,emoji:'🍠'},
+      {id:906,nombre:'Ensalada mixta',desc:'Tomate, lechuga, zanahoria',precio:8,emoji:'🥗'},
+    ]}]
+  },
+  {
+    id:10, tipo:'almuerzo', nombre:'Comedor Doña Rosi', emoji:'🍽️',
+    desc:'Sazón casero de toda la vida, menú variado cada día',
+    tags:['Casero','Almuerzo','Económico'],
+    horario:'11:00-14:00', abierto:true, premium:false, wsp:'59179000002', clave:'rosi123',
+    estado:'prueba', fechaVence:'30/04/2026', servicios:'recoger,mesa,domicilio',
+    menuDia:{
+      fecha:'Hoy',
+      sopa:{nombre:'Sopa de verduras con fideos',emoji:'🥣'},
+      segundos:[
+        {nombre:'Arroz con pollo guisado',emoji:'🍗'},
+        {nombre:'Carne a la plancha con arroz',emoji:'🥩'},
+      ],
+      acompanamiento:{nombre:'Plátano frito',emoji:'🍌'},
+      bebida:{nombre:'Refresco o agua',emoji:'🥤'},
+      precios:{completo:25,soloSegundo:20,soloSopa:8}
+    }
+  },
+  {
+    id:7, tipo:'almuerzo', nombre:'Doña Pola', emoji:'🍱',
+    desc:'Almuerzo casero, menú del día variado',
+    tags:['Almuerzo','Casero'],
+    horario:'11:00-14:00', abierto:true, premium:false, wsp:'59177000001', clave:'pola123',
+    estado:'prueba', fechaVence:'01/03/2026', servicios:'recoger',
+    menuDia:{
+      fecha:'Hoy',
+      sopa:{nombre:'Sopa de verduras',emoji:'🥣'},
+      segundos:[{nombre:'Arroz con carne',emoji:'🍛'}],
+      acompanamiento:{nombre:'Ensalada',emoji:'🥗'},
+      bebida:{nombre:'Jugo',emoji:'🥤'},
+      precios:{completo:25,soloSegundo:20,soloSopa:8}
     }
   }
 ];
@@ -1198,6 +1275,13 @@ function verNegocio(id){
       <p>${n.desc}</p>
       <div class="neg-sub">🕐 ${n.horario} &nbsp;·&nbsp; <span style="color:${n.abierto?'#52b788':'#f87171'}">${n.abierto?'● Abierto ahora':'● Cerrado'}</span></div>
       ${n.direccion?`<div class="neg-sub" style="margin-top:3px">📍 ${n.direccion}</div>`:''}
+      ${n.servicios?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
+        ${n.servicios.split(',').map(s=>
+          s==='recoger'?'<span style="background:rgba(255,255,255,.15);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px">🏃 Recoger</span>':
+          s==='mesa'?'<span style="background:rgba(255,255,255,.15);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px">🪑 Mesa</span>':
+          s==='domicilio'?'<span style="background:rgba(255,255,255,.15);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px">🛵 Domicilio</span>':''
+        ).join('')}
+      </div>`:''}
       <div class="neg-badges">
         <span class="cbadge ${n.tipo==='rapida'?'cb-r':'cb-a'}" style="position:static">${n.tipo==='rapida'?'Comida Rápida':'Almuerzo del Día'}</span>
         ${n.premium?'<span class="cbadge cb-p" style="position:static">⭐ Premium</span>':''}
@@ -1391,6 +1475,34 @@ function updateCarrito(){
 }
 
 function abrirModalCarrito(){
+  // Show servicio options based on negocio
+  const neg = carrito.length ? getTodos().find(n=>n.wsp===carrito[0].wsp) : null;
+  const wrap = document.getElementById('modal-servicios-wrap');
+  const btns = document.getElementById('modal-servicios-btns');
+  if(neg && neg.servicios && wrap && btns){
+    const srvs = neg.servicios.split(',').filter(Boolean);
+    if(srvs.length > 0){
+      wrap.style.display='block';
+      const labels = {recoger:'🏃 Recoger en local', mesa:'🪑 Reserva mesa', domicilio:'🛵 Envío a domicilio'};
+      btns.innerHTML = srvs.map(s=>`
+        <button onclick="selServicioModal(this,'${s}')" data-srv="${s}"
+          style="padding:8px 14px;border-radius:20px;border:2px solid var(--borde);background:#fff;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s">
+          ${labels[s]||s}
+        </button>`).join('');
+      // Auto-select first option
+      const first = btns.querySelector('button');
+      if(first) selServicioModal(first, srvs[0]);
+    } else {
+      wrap.style.display='none';
+    }
+  } else if(wrap){
+    wrap.style.display='none';
+  }
+
+  // Generar horas disponibles según negocio y hora actual
+  const negHoras = carrito.length ? getTodos().find(n=>n.wsp===carrito[0].wsp) : null;
+  generarHorasDisponibles(negHoras);
+
   document.getElementById('modal-items').innerHTML=carrito.map(c=>`
     <div class="modal-item">
       <div style="flex:1;min-width:0">
@@ -1418,6 +1530,72 @@ function cancelarPedido(){
   ocultarModal();
 }
 
+function generarHorasDisponibles(neg){
+  const sel = document.getElementById('hora-recogida');
+  const sinOpc = document.getElementById('hora-sin-opciones');
+  if(!sel) return;
+  sel.innerHTML = '';
+
+  const ahora = new Date();
+  // Minimo: ahora + 10 minutos
+  const minimo = new Date(ahora.getTime() + 10 * 60000);
+
+  // Parsear horario del negocio (ej: "11:00-22:00" o "Lun-Vie · 8:00-20:00")
+  let horaAbre = 0, horaCierra = 24;
+  if(neg && neg.horario){
+    const match = neg.horario.match(/(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})/);
+    if(match){
+      horaAbre = parseInt(match[1]) + parseInt(match[2])/60;
+      horaCierra = parseInt(match[3]) + parseInt(match[4])/60;
+    }
+  }
+
+  // Generar slots cada 15 minutos desde minimo hasta cierre
+  const slots = [];
+  let cursor = new Date(minimo);
+  // Redondear al próximo cuarto de hora
+  const mins = cursor.getMinutes();
+  const resto = 10 - (mins % 10);
+  cursor.setMinutes(mins + (resto === 10 ? 0 : resto), 0, 0);
+
+  while(true){
+    const h = cursor.getHours() + cursor.getMinutes()/60;
+    if(h >= horaCierra) break;
+    if(h >= horaAbre){
+      const hh = cursor.getHours();
+      const mm = cursor.getMinutes().toString().padStart(2,'0');
+      const ampm = hh >= 12 ? 'PM' : 'AM';
+      const hh12 = hh > 12 ? hh-12 : hh === 0 ? 12 : hh;
+      slots.push(`${hh12}:${mm} ${ampm}`);
+    }
+    cursor = new Date(cursor.getTime() + 10 * 60000);
+    if(cursor.getDate() !== ahora.getDate()) break; // no pasar a mañana
+  }
+
+  if(slots.length === 0){
+    sel.style.display = 'none';
+    if(sinOpc) sinOpc.style.display = 'block';
+  } else {
+    sel.style.display = 'block';
+    if(sinOpc) sinOpc.style.display = 'none';
+    sel.innerHTML = slots.map(s=>`<option>${s}</option>`).join('');
+  }
+}
+
+function selServicioModal(btn, srv){
+  document.querySelectorAll('#modal-servicios-btns button').forEach(function(b){
+    b.style.background='#fff';
+    b.style.borderColor='var(--borde)';
+    b.style.color='';
+  });
+  btn.style.background='#2d6a4f';
+  btn.style.borderColor='#2d6a4f';
+  btn.style.color='#fff';
+  btn.setAttribute('data-selected','1');
+  // Store selected service
+  document.getElementById('modal-servicios-btns').setAttribute('data-sel', srv);
+}
+
 function ocultarModal(){
   document.getElementById('modal-carrito').style.display='none';
 }
@@ -1443,10 +1621,19 @@ function enviarWSP(){
   const items = carrito.map(c=>`• ${c.nombre} × ${c.qty} = Bs ${c.precio*c.qty}`).join('\n');
   const total = carrito.reduce((s,c)=>s+c.precio*c.qty,0);
   const nombreLinea = nombre ? `\n👤 Pedido a nombre de: *${nombre}*` : '';
+  // Get selected service
+  const srvBtns = document.getElementById('modal-servicios-btns');
+  const srvSel = srvBtns ? srvBtns.getAttribute('data-sel') : '';
+  const srvLabels = {recoger:'🏃 Recoger en local', mesa:'🪑 Reserva de mesa', domicilio:'🛵 Envío a domicilio'};
+  const srvLinea = srvSel ? `\n🍽️ Servicio: *${srvLabels[srvSel]||srvSel}*` : '';
   const msg = encodeURIComponent(
-    `¡Hola! Quiero hacer un pedido para *recoger*:\n\n${items}\n\n*Total: Bs ${total}*\n⏰ Hora de recogida: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
+    `¡Hola! Quiero hacer un pedido:\n\n${items}\n\n*Total: Bs ${total}*${srvLinea}\n⏰ Hora: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
   );
   window.open(`https://wa.me/${wsp}?text=${msg}`,'_blank');
+  // Limpiar carrito después de enviar
+  carrito=[];
+  updateCarrito();
+  ocultarModal();
 }
 
 /* ══════════════════════════════════════════
@@ -1477,6 +1664,7 @@ function registrar(){
   const horario=document.getElementById('r-horario').value.trim()||'08:00–20:00';
   const desc=document.getElementById('r-desc').value.trim()||'Negocio de comida en Concepción';
   const emoji=document.getElementById('r-emoji').value.trim()||'🍽️';
+  const servicios=document.getElementById('r-servicios').value||'recoger';
   const logoBase64=document.getElementById('r-logo-base64').value||'';
   const clave=document.getElementById('r-clave').value.trim();
   const tipo = document.getElementById('plan-almuerzo').classList.contains('sel')
@@ -1532,7 +1720,7 @@ function registrar(){
   }
 
   const nuevo={
-    id:Date.now(), nombre, wsp:wspRaw, direccion:dir, mapsUrl, horario, desc, emoji, logo:logoBase64, tipo, clave,
+    id:Date.now(), nombre, wsp:wspRaw, direccion:dir, mapsUrl, horario, desc, emoji, logo:logoBase64, tipo, clave, servicios,
     premium:false, abierto:true, _nuevo:true,
     tags:tipo==='almuerzo'?['Almuerzo','Casero']:tipo==='postres'?['Postres','Antojos','Fresas']:['Comida Rápida'],
     estado:'prueba',
@@ -1550,7 +1738,7 @@ function registrar(){
   };
 
   const lista=getRegistrados(); lista.push(nuevo); guardarRegistrados(lista);
-  ['r-nombre','r-wsp','r-dir','r-maps','r-maps-lat','r-maps-lng','r-horario','r-hora-abre','r-hora-cierra','r-emoji','r-clave','r-logo-base64'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['r-nombre','r-wsp','r-dir','r-maps','r-maps-lat','r-maps-lng','r-horario','r-hora-abre','r-hora-cierra','r-emoji','r-clave','r-logo-base64','r-servicios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   quitarUbicacion();
   selDias('ninguno');
   const prev=document.getElementById('horario-preview');
@@ -1797,6 +1985,29 @@ function sincronizarEmoji(input){
     if(emojiShow) emojiShow.textContent = input.value || '🍽️';
   }
 }
+/* ── SERVICIOS ── */
+function toggleServicio(btn){
+  const activo = btn.classList.contains('srv-activo');
+  if(activo){
+    btn.classList.remove('srv-activo');
+    btn.style.background='#fff';
+    btn.style.borderColor='var(--borde)';
+    btn.style.color='';
+  } else {
+    btn.classList.add('srv-activo');
+    btn.style.background='#2d6a4f';
+    btn.style.borderColor='#2d6a4f';
+    btn.style.color='#fff';
+  }
+  // Update hidden input
+  const activos = [];
+  document.querySelectorAll('.srv-btn.srv-activo').forEach(function(b){
+    activos.push(b.getAttribute('data-srv'));
+  });
+  const inp = document.getElementById('r-servicios');
+  if(inp) inp.value = activos.join(',');
+}
+
 function mostrarInstalacion(){
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isInStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
