@@ -750,6 +750,12 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
             <div style="font-size:.72rem;color:#6b7280;margin-bottom:5px">Fotos de platos y menú editable</div>
             <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:900;color:#2d6a4f">Bs 20/mes</div>
           </div>
+          <div id="plan-pago-postres" onclick="selPlanPago('postres')" style="border:2px solid #e5e7eb;border-radius:13px;padding:12px 10px;text-align:center;cursor:pointer;transition:all .2s;grid-column:1/-1">
+            <div style="font-size:1.6rem;margin-bottom:4px">🍓</div>
+            <div style="font-weight:700;font-size:.85rem;margin-bottom:2px">Postres & Antojos</div>
+            <div style="font-size:.72rem;color:#6b7280;margin-bottom:5px">Fresas, helados, jugos — menú fijo con fotos</div>
+            <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:900;color:#2d6a4f">Bs 20/mes</div>
+          </div>
         </div>
 
         <!-- PASO 2: QR (oculto hasta elegir plan) -->
@@ -978,6 +984,26 @@ _fbScript.textContent = `
   window._onSnapshot = onSnapshot;
   window._getDoc = getDoc;
   console.log('Firebase listo');
+
+  // Cargar QRs desde Firestore
+  getDoc(doc(db, 'config', 'qrs')).then(function(snap){
+    if(snap.exists()){
+      const data = snap.data();
+      window._qrsFromFirebase = data;
+      localStorage.setItem('cc_qrs', JSON.stringify(data));
+      if(typeof cargarQRsAdmin === 'function') cargarQRsAdmin();
+    }
+  });
+
+  // Escuchar config en tiempo real (QRs del admin)
+  onSnapshot(doc(db, 'config', 'qrs'), function(snap){
+    if(snap.exists()){
+      const data = snap.data();
+      window._qrsFromFirebase = data;
+      localStorage.setItem('cc_qrs', JSON.stringify(data));
+      if(typeof cargarQRsAdmin === 'function') cargarQRsAdmin();
+    }
+  });
 
   // Escuchar negocios en tiempo real
   onSnapshot(collection(db, 'negocios'), function(snap){
@@ -2662,9 +2688,46 @@ let planPagoSeleccionado = null;
 let comprobanteBase64 = null;
 let negPagando = null;
 
-// Guardar/obtener QR del admin
-function getQRs(){ try{return JSON.parse(localStorage.getItem('cc_qrs')||'{}');}catch(e){return{};} }
-function guardarQR(tipo, base64){ const q=getQRs(); q[tipo]=base64; localStorage.setItem('cc_qrs',JSON.stringify(q)); }
+// Guardar/obtener QR del admin - usa Firestore + localStorage
+let _qrsCache = {};
+
+function getQRs(){ 
+  // Primero Firebase, luego cache, luego localStorage
+  if(window._qrsFromFirebase && Object.keys(window._qrsFromFirebase).length > 0) return window._qrsFromFirebase;
+  if(Object.keys(_qrsCache).length > 0) return _qrsCache;
+  try{ return JSON.parse(localStorage.getItem('cc_qrs')||'{}'); }catch(e){ return {}; } 
+}
+
+function guardarQR(tipo, base64){ 
+  // Guardar en localStorage y cache
+  const q = getQRs(); 
+  q[tipo] = base64; 
+  _qrsCache = q;
+  localStorage.setItem('cc_qrs', JSON.stringify(q)); 
+  // Guardar en Firestore para que todos los dispositivos lo vean
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db, 'config', 'qrs'), q)
+      .then(function(){ console.log('QR guardado en Firebase'); })
+      .catch(function(e){ console.error('Error guardando QR:', e); });
+  }
+}
+
+// Cargar QRs desde Firestore al iniciar
+function cargarQRsDesdeFirebase(){
+  if(!window._db || !window._fbReady) return;
+  window._getDoc(window._doc(window._db, 'config', 'qrs'))
+    .then(function(snap){
+      if(snap.exists()){
+        const data = snap.data();
+        _qrsCache = data;
+        localStorage.setItem('cc_qrs', JSON.stringify(data));
+        // Actualizar vista si el admin está abierto
+        if(document.getElementById('qr15-preview')) cargarQRsAdmin();
+        console.log('QRs cargados desde Firebase');
+      }
+    })
+    .catch(function(e){ console.log('No hay QRs en Firebase aún:', e); });
+}
 
 // Admin sube QR
 function subirQR(input, tipo){
@@ -2712,12 +2775,16 @@ function mostrarPago(neg){
   comprobanteBase64 = null;
 
   // Pre-seleccionar plan según tipo del negocio
-  document.getElementById('plan-pago-almuerzo').classList.remove('sel');
-  document.getElementById('plan-pago-rapida').classList.remove('sel');
-  document.getElementById('plan-pago-'+(neg.tipo||'almuerzo')).classList.add('sel');
+  ['almuerzo','rapida','postres'].forEach(function(t){
+    var el = document.getElementById('plan-pago-'+t);
+    if(el){ el.style.borderColor='#e5e7eb'; el.style.background='#fff'; }
+  });
+  var tipoNeg = neg.tipo || 'almuerzo';
+  var elSel = document.getElementById('plan-pago-'+tipoNeg);
+  if(elSel){ elSel.style.borderColor='#2d6a4f'; elSel.style.background='#d8f3dc'; }
 
   // Mostrar QR del plan
-  mostrarQRPlan(neg.tipo||'almuerzo');
+  mostrarQRPlan(tipoNeg);
 
   // Reset steps
   document.getElementById('pago-step-1').style.display='block';
@@ -2742,8 +2809,8 @@ function mostrarPago(neg){
 
 function selPlanPago(tipo){
   planPagoSeleccionado = tipo;
-  // Reset both
-  ['almuerzo','rapida'].forEach(function(t){
+  // Reset all
+  ['almuerzo','rapida','postres'].forEach(function(t){
     var el = document.getElementById('plan-pago-'+t);
     if(el){ el.style.borderColor='#e5e7eb'; el.style.background='#fff'; }
   });
@@ -2789,6 +2856,7 @@ function activarConComprobante(){
   if(!negPagando || !comprobanteBase64){ alert('Por favor subí el comprobante de pago.'); return; }
 
   const monto = planPagoSeleccionado==='almuerzo' ? 'Bs 15' : 'Bs 20';
+  const planLabel = planPagoSeleccionado==='almuerzo' ? 'Almuerzo Diario' : planPagoSeleccionado==='postres' ? 'Postres & Antojos' : 'Comida Rápida';
   const nuevaFechaVence = new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('es-BO');
 
   // Activar el negocio en localStorage
@@ -2809,7 +2877,7 @@ function activarConComprobante(){
     '💳 *COMPROBANTE DE PAGO - ComidaConce*\n\n' +
     '🏪 Negocio: *' + negPagando.nombre + '*\n' +
     '📱 Celular: ' + negPagando.wsp.slice(-8) + '\n' +
-    '💰 Plan: ' + monto + '/mes (' + (planPagoSeleccionado==='almuerzo'?'Almuerzo Diario':'Comida Rápida') + ')\n' +
+    '💰 Plan: ' + monto + '/mes (' + planLabel + ')\n' +
     '📅 Fecha: ' + new Date().toLocaleDateString('es-BO') + '\n' +
     '✅ Membresía activada hasta: ' + nuevaFechaVence + '\n\n' +
     '⚠️ Verificar comprobante. Si es falso, eliminar desde el panel admin.'
