@@ -769,43 +769,16 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
 
           </div>
 
-          <!-- PASO 3: Comprobante -->
-          <div style="font-size:.75rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">3 · Subí tu comprobante</div>
+          <!-- PASO 3: Activar -->
+          <div style="font-size:.75rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">3 · Activá tu membresía</div>
 
-          <!-- Botones para elegir fuente -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#d8f3dc;border:2px solid #52b788;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center" onclick="ocultarErrorPermiso()">
-              <span style="font-size:1.4rem">🖼️</span>
-              <span style="font-size:.8rem;font-weight:700;color:#2d6a4f">Desde fototeca</span>
-              <input type="file" accept="image/*" style="display:none" onchange="previsualizarComprobante(this)" onclick="this.value=''">
-            </label>
-            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fce4d6;border:2px solid #e76f51;border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center" onclick="ocultarErrorPermiso()">
-              <span style="font-size:1.4rem">📷</span>
-              <span style="font-size:.8rem;font-weight:700;color:#c1440e">Tomar foto</span>
-              <input type="file" accept="image/*" capture="environment" style="display:none" onchange="previsualizarComprobante(this)" onclick="this.value=''">
-            </label>
+          <div style="background:#fef9c3;border:1.5px solid #f4a261;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.82rem;color:#713f12;line-height:1.6">
+            📸 Al tocar el botón se activará tu membresía y se abrirá WhatsApp.<br>
+            <strong>Adjuntá la foto del comprobante</strong> de pago en ese chat para que el administrador pueda verificarlo.
           </div>
 
-          <!-- Error de permisos -->
-          <div id="permiso-error-box" style="display:none;background:#fee2e2;border:1.5px solid #ef4444;border-radius:12px;padding:12px 14px;margin-bottom:10px">
-            <div style="font-size:.88rem;font-weight:700;color:#991b1b;margin-bottom:4px">⚠️ Permiso denegado</div>
-            <div style="font-size:.82rem;color:#7f1d1d;line-height:1.5">
-              Tu navegador no tiene permiso para acceder a las fotos.<br><br>
-              <strong>En Android Chrome:</strong><br>
-              Tocá los 3 puntos ⋮ → Configuración → Privacidad → Configuración de sitios → Imágenes / Almacenamiento → Permitir<br><br>
-              <strong>En iPhone Safari:</strong><br>
-              Configuración → Safari → Cámara y Fotos → Permitir
-            </div>
-          </div>
-
-          <!-- Preview comprobante -->
-          <div id="comprobante-box" style="display:none;background:#f0fdf4;border:1.5px solid #52b788;border-radius:12px;padding:10px;margin-bottom:10px;text-align:center">
-            <div style="font-size:.78rem;font-weight:600;color:#2d6a4f;margin-bottom:6px">✅ Comprobante listo</div>
-            <img id="comprobante-preview" src="" alt="comprobante" style="max-width:100%;max-height:140px;border-radius:8px;object-fit:cover">
-          </div>
-
-          <button id="btn-activar" onclick="activarConComprobante()" disabled style="width:100%;background:#aaa;color:#fff;border:none;padding:14px;border-radius:13px;font-size:1rem;font-weight:700;cursor:not-allowed;font-family:inherit;margin-bottom:8px;transition:background .2s">
-            Enviar comprobante y activar
+          <button id="btn-activar" onclick="activarConComprobante()" style="width:100%;background:#2d6a4f;color:#fff;border:none;padding:14px;border-radius:13px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;transition:background .2s">
+            ✅ Activar membresía y enviar comprobante
           </button>
           <button onclick="cerrarPago()" style="width:100%;background:none;border:none;padding:9px;color:#6b7280;font-family:inherit;font-size:.83rem;cursor:pointer">Cancelar</button>
         </div>
@@ -893,9 +866,9 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
       </div>
     </div>
 
-    <div class="notif-bar">
-      <span>⚠️ 2 negocios con prueba próxima a vencer (en 3 días)</span>
-      <button class="btn-notif" onclick="alert('Recordatorios enviados por WhatsApp:\nPollos El Chino ✓\nLa Abuela ✓')">Enviar recordatorios</button>
+    <div class="notif-bar" id="notif-bar" style="display:none">
+      <span id="notif-texto">⚠️ Negocios próximos a vencer</span>
+      <button class="btn-notif" onclick="enviarRecordatorios()">Enviar recordatorios</button>
     </div>
 
     <!-- ESTADÍSTICAS -->
@@ -2643,6 +2616,7 @@ function loginAdmin(){
     renderAdminTodos();
     actualizarStats();
     cargarQRsAdmin();
+    verificarProximosAVencer();
     // Esperar Firebase antes de cargar analytics
     var intentosAnalytics = 0;
     var esperarFirebase = setInterval(function(){
@@ -2779,6 +2753,80 @@ function cargarAnalytics(periodo){
     }
     if(elSem) elSem.textContent = dispositivosUnicos.size;
   });
+}
+
+function verificarProximosAVencer(){
+  const todos = getTodos();
+  const hoy = new Date();
+  const proximos = todos.filter(function(n){
+    if(n.socio || n.estado==='socio' || n.estado==='activo_pago') return false;
+    if(!n.fechaVence) return false;
+    var partes = n.fechaVence.split('/');
+    if(partes.length!==3) return false;
+    var fv = new Date(parseInt(partes[2]), parseInt(partes[1])-1, parseInt(partes[0]));
+    var diasRestantes = Math.ceil((fv - hoy) / (1000*60*60*24));
+    return diasRestantes >= 0 && diasRestantes <= 5; // próximos 5 días
+  });
+
+  var notifBar = document.getElementById('notif-bar');
+  var notifTexto = document.getElementById('notif-texto');
+  if(proximos.length > 0){
+    notifBar.style.display = 'flex';
+    notifTexto.textContent = '⚠️ ' + proximos.length + ' negocio' + (proximos.length>1?'s':'') + ' próximo' + (proximos.length>1?'s':'') + ' a vencer';
+  } else {
+    notifBar.style.display = 'none';
+  }
+}
+
+function enviarRecordatorios(){
+  const todos = getTodos();
+  const hoy = new Date();
+  const proximos = todos.filter(function(n){
+    if(n.socio || n.estado==='socio' || n.estado==='activo_pago') return false;
+    if(!n.fechaVence || !n.wsp) return false;
+    var partes = n.fechaVence.split('/');
+    if(partes.length!==3) return false;
+    var fv = new Date(parseInt(partes[2]), parseInt(partes[1])-1, parseInt(partes[0]));
+    var diasRestantes = Math.ceil((fv - hoy) / (1000*60*60*24));
+    return diasRestantes >= 0 && diasRestantes <= 5;
+  });
+
+  if(proximos.length === 0){
+    alert('No hay negocios próximos a vencer.');
+    return;
+  }
+
+  // Enviar mensaje a cada negocio uno por uno
+  var idx = 0;
+  function enviarSiguiente(){
+    if(idx >= proximos.length){
+      alert('✅ Recordatorios enviados a ' + proximos.length + ' negocio' + (proximos.length>1?'s':'') + '.');
+      return;
+    }
+    var n = proximos[idx];
+    var partes = n.fechaVence.split('/');
+    var fv = new Date(parseInt(partes[2]), parseInt(partes[1])-1, parseInt(partes[0]));
+    var dias = Math.ceil((fv - hoy) / (1000*60*60*24));
+    var plan = n.tipo==='almuerzo' ? 'Bs 15/mes' : 'Bs 20/mes';
+    var lineas = [
+      'Hola ' + n.nombre + '!',
+      '',
+      'Te escribimos desde ComidaConce.',
+      'Tu periodo de prueba vence en ' + dias + ' dia' + (dias!==1?'s':'') + '.',
+      '',
+      'Para seguir recibiendo pedidos renova tu membresia: ' + plan + '.',
+      'Entra a la app, toca Subir Menu, ingresa tu clave, elige tu plan y paga por QR.',
+      '',
+      'Gracias por ser parte de ComidaConce!'
+    ];
+    var msg = encodeURIComponent(lineas.join('\n'));
+    var _unused = encodeURIComponent(
+      '');
+    window.open('https://wa.me/' + n.wsp + '?text=' + msg, '_blank');
+    idx++;
+    setTimeout(enviarSiguiente, 1500); // esperar 1.5s entre cada mensaje
+  }
+  enviarSiguiente();
 }
 
 function guardarAdminWSP(){
@@ -3101,12 +3149,7 @@ function mostrarPago(neg){
   // Reset steps
   document.getElementById('pago-step-1').style.display='block';
   document.getElementById('pago-step-2').style.display='none';
-  const prev = document.getElementById('comprobante-preview');
-  if(prev){ prev.src=''; }
-  const box = document.getElementById('comprobante-box');
-  if(box) box.style.display='none';
-  const btn = document.getElementById('btn-activar');
-  if(btn){ btn.disabled=true; btn.style.background='#aaa'; btn.style.cursor='not-allowed'; }
+  // btn siempre activo ahora (no requiere foto)
   document.getElementById('qr-display').style.display='none';
   const noPlan = document.getElementById('qr-no-plan');
   if(noPlan) noPlan.style.display='block';
@@ -3187,7 +3230,7 @@ function mostrarErrorPermiso(){
 }
 
 function activarConComprobante(){
-  if(!negPagando || !comprobanteBase64){ alert('Por favor subí el comprobante de pago.'); return; }
+  if(!negPagando){ alert('Error: no hay negocio seleccionado.'); return; }
 
   const monto = planPagoSeleccionado==='almuerzo' ? 'Bs 15' : 'Bs 20';
   const planLabel = planPagoSeleccionado==='almuerzo' ? 'Almuerzo Diario' : planPagoSeleccionado==='postres' ? 'Postres & Antojos' : 'Comida Rápida';
@@ -3255,7 +3298,7 @@ function activarConComprobante(){
     '💰 Plan: ' + monto + '/mes (' + planLabel + ')\n' +
     '📅 Fecha: ' + new Date().toLocaleDateString('es-BO') + '\n' +
     '✅ Membresía activada hasta: ' + nuevaFechaVence + '\n\n' +
-    '⚠️ Verificar comprobante. Si es falso, eliminar desde el panel admin.'
+    '\n📸 ADJUNTA la foto del comprobante de pago en este mensaje para verificacion.'
   );
   window.open('https://wa.me/'+adminWSP+'?text='+msg, '_blank');
 
