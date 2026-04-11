@@ -1065,6 +1065,23 @@ _fbScript.textContent = `
     }
   });
 
+  // Sincronizar recomendados
+  onSnapshot(doc(db, 'config', 'recomendados'), function(snap){
+    if(snap.exists() && snap.data().ids){
+      localStorage.setItem('cc_recomendados', JSON.stringify(snap.data().ids));
+      if(typeof renderGrid === 'function') renderGrid(getTodos());
+      if(typeof renderAdminTodos === 'function') renderAdminTodos();
+    }
+  });
+
+  // Sincronizar descuentos
+  onSnapshot(doc(db, 'config', 'descuentos'), function(snap){
+    if(snap.exists() && snap.data().ids){
+      localStorage.setItem('cc_descuentos', JSON.stringify(snap.data().ids));
+      if(typeof renderGrid === 'function') renderGrid(getTodos());
+    }
+  });
+
   // Sincronizar socios en tiempo real
   onSnapshot(doc(db, 'config', 'socios'), function(snap){
     if(snap.exists()){
@@ -1454,6 +1471,8 @@ function renderGrid(lista){
           <span class="cbadge ${n.tipo==='rapida'?'cb-r':n.tipo==='postres'?'cb-pos':'cb-a'}">${n.tipo==='rapida'?'Comida Rápida':n.tipo==='postres'?'Postres & Antojos':'Almuerzo Día'}</span>
           ${n.premium?'<span class="cbadge cb-p">⭐ Premium</span>':''}
           ${esDestacado(n.id)?'<span class="cbadge" style="background:#8b5cf6;color:#fff">🔝 Destacado</span>':''}
+          ${esRecomendado(n.id)?'<span class="cbadge" style="background:#f59e0b;color:#fff">👍 Recomendado</span>':''}
+          ${tieneDescuento(n.id)?'<span class="cbadge" style="background:#e11d48;color:#fff">🏷️ -2Bs</span>':''}
           ${n.socio?'<span class="cbadge" style="background:#f4a261;color:#7a4800">🤝 Socio</span>':''}
           ${!n.abierto?'<span class="cbadge cb-c">Cerrado</span>':''}
           ${n._nuevo?'<span class="cbadge cb-new">✨ Nuevo</span>':''}
@@ -1521,6 +1540,7 @@ function verNegocio(id){
       <p>${n.desc}</p>
       <div class="neg-sub">🕐 ${n.horario} &nbsp;·&nbsp; <span style="color:${n.abierto?'#52b788':'#f87171'}">${n.abierto?'● Abierto ahora':'● Cerrado'}</span></div>
       ${n.direccion?`<div class="neg-sub" style="margin-top:3px">📍 ${n.direccion}</div>`:''}
+      ${tieneDescuento(n.id)?`<div style="background:#e11d48;color:#fff;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;margin-top:6px">🏷️ Descuento 2Bs en pedidos mayores a Bs 20</div>`:''}
       ${n.servicios?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
         ${n.servicios.split(',').map(s=>
           s==='recoger'?'<span style="background:rgba(255,255,255,.15);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px">🏃 Recoger</span>':
@@ -1865,7 +1885,14 @@ function enviarWSP(){
   const nombre = nombreEl ? nombreEl.value.trim() : '';
   const wsp = carrito[0].wsp||'59170000000';
   const items = carrito.map(c=>`• ${c.nombre} × ${c.qty} = Bs ${c.precio*c.qty}`).join('\n');
-  const total = carrito.reduce((s,c)=>s+c.precio*c.qty,0);
+  const totalBruto = carrito.reduce((s,c)=>s+c.precio*c.qty,0);
+  // Verificar descuento
+  const negCarrito = carrito.length ? getTodos().find(n=>n.wsp===carrito[0].wsp) : null;
+  const hoy2 = new Date().toISOString().split('T')[0];
+  const descKey = 'cc_desc_usado_' + (negCarrito?negCarrito.id:'') + '_' + hoy2;
+  const descUsado = localStorage.getItem(descKey) === '1';
+  const aplicarDesc = negCarrito && tieneDescuento(negCarrito.id) && totalBruto >= 20 && !descUsado;
+  const total = aplicarDesc ? totalBruto - 2 : totalBruto;
   const nombreLinea = nombre ? `\n👤 Pedido a nombre de: *${nombre}*` : '';
   // Get selected service
   const srvBtns = document.getElementById('modal-servicios-btns');
@@ -1873,8 +1900,12 @@ function enviarWSP(){
   const srvLabels = {recoger:'🏃 Recoger en local', mesa:'🪑 Reserva de mesa', domicilio:'🛵 Envío a domicilio'};
   const srvLinea = srvSel ? `\n🍽️ Servicio: *${srvLabels[srvSel]||srvSel}*` : '';
   const msg = encodeURIComponent(
-    `¡Hola! Quiero hacer un pedido:\n\n${items}\n\n*Total: Bs ${total}*${srvLinea}\n⏰ Hora: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
+    `¡Hola! Quiero hacer un pedido:\n\n${items}${descLinea}\n\n*Total: Bs ${total}*${srvLinea}\n⏰ Hora: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
   );
+  // Marcar descuento como usado hoy si se aplicó
+  if(aplicarDesc && negCarrito){
+    localStorage.setItem(descKey, '1');
+  }
   window.open(`https://wa.me/${wsp}?text=${msg}`,'_blank');
 
   // ── REGISTRAR PEDIDO EN ANALYTICS ──
@@ -2980,6 +3011,42 @@ function renderAdminNuevos(){
   renderAdminTodos();
 }
 
+function getRecomendados(){ try{return JSON.parse(localStorage.getItem('cc_recomendados')||'[]');}catch(e){return[];} }
+function guardarRecomendados(l){
+  localStorage.setItem('cc_recomendados',JSON.stringify(l));
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'config','recomendados'),{ids:l}).catch(function(){});
+  }
+}
+function esRecomendado(id){ return getRecomendados().includes(id); }
+function toggleRecomendado(id){
+  var lista = getRecomendados();
+  var idx = lista.indexOf(id);
+  if(idx!==-1) lista.splice(idx,1);
+  else lista.push(id);
+  guardarRecomendados(lista);
+  renderAdminTodos();
+  renderGrid(getTodos());
+}
+
+function getDescuentos(){ try{return JSON.parse(localStorage.getItem('cc_descuentos')||'[]');}catch(e){return[];} }
+function guardarDescuentos(l){
+  localStorage.setItem('cc_descuentos',JSON.stringify(l));
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'config','descuentos'),{ids:l}).catch(function(){});
+  }
+}
+function tieneDescuento(id){ return getDescuentos().includes(id); }
+function toggleDescuento(id){
+  var lista = getDescuentos();
+  var idx = lista.indexOf(id);
+  if(idx!==-1) lista.splice(idx,1);
+  else lista.push(id);
+  guardarDescuentos(lista);
+  renderAdminTodos();
+  renderGrid(getTodos());
+}
+
 function activarManual(id, nombre){
   var meses = prompt('Activar membresia de ' + nombre + '\n\nCuantos meses activar? (1, 2, 3...)', '1');
   if(!meses || isNaN(parseInt(meses))) return;
@@ -3091,6 +3158,12 @@ function renderAdminTodos(){
         <button class="btn-sm" style="border-color:#8b5cf6;color:#8b5cf6" onclick="toggleDestacado(${n.id})">
           ${esDestacado(n.id)?'▼ Quitar top':'▲ Poner 1°'}
         </button>
+        <button class="btn-sm" style="border-color:#f59e0b;color:#b45309" onclick="toggleRecomendado(${n.id})">
+          ${esRecomendado(n.id)?'Quitar rec.':'👍 Recomendado'}
+        </button>
+        <button class="btn-sm" style="border-color:#e11d48;color:#e11d48" onclick="toggleDescuento(${n.id})">
+          ${tieneDescuento(n.id)?'Quitar desc.':'🏷️ Descuento 2Bs'}
+        </button>
         <button class="btn-sm" style="border-color:#2d6a4f;color:#2d6a4f" onclick="activarManual(${n.id},'${n.nombre}')">
           ${getEstadoNeg(n)==='activo'?'🔄 Renovar':'✅ Activar'}
         </button>
@@ -3118,6 +3191,12 @@ function renderAdminTodos(){
         </button>
         <button class="btn-sm" style="border-color:#8b5cf6;color:#8b5cf6" onclick="toggleDestacado(${n.id})">
           ${esDestacado(n.id)?'▼ Quitar top':'▲ Poner 1°'}
+        </button>
+        <button class="btn-sm" style="border-color:#f59e0b;color:#b45309" onclick="toggleRecomendado(${n.id})">
+          ${esRecomendado(n.id)?'Quitar rec.':'👍 Recomendado'}
+        </button>
+        <button class="btn-sm" style="border-color:#e11d48;color:#e11d48" onclick="toggleDescuento(${n.id})">
+          ${tieneDescuento(n.id)?'Quitar desc.':'🏷️ Descuento 2Bs'}
         </button>
         <button class="btn-sm" style="border-color:#2d6a4f;color:#2d6a4f" onclick="activarManual(${n.id},'${n.nombre}')">
           ${getEstadoNeg(n)==='activo'?'🔄 Renovar':'✅ Activar'}
