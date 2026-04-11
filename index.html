@@ -1927,12 +1927,17 @@ function enviarWSP(){
   const negActual = carrito.length ? getTodos().find(function(n){ return n.wsp===carrito[0].wsp; }) : null;
   if(negActual && !estaAbierto(negActual)){
     var horario = negActual.horario || '';
-    var avisoEl = document.getElementById('aviso-horario');
-    if(avisoEl){
-      avisoEl.innerHTML = '⏰ <strong>Fuera de horario de atención</strong><br>Este negocio atiende: ' + horario;
-      avisoEl.style.display = 'block';
-      setTimeout(function(){ avisoEl.style.display='none'; }, 4000);
+    // Mostrar toast visible siempre
+    var toast = document.getElementById('toast-horario');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'toast-horario';
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#991b1b;color:#fff;padding:12px 20px;border-radius:12px;font-size:.88rem;font-weight:600;z-index:9999;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:90vw;line-height:1.5';
+      document.body.appendChild(toast);
     }
+    toast.innerHTML = '⏰ Fuera de horario de atención<br><span style="font-weight:400;font-size:.8rem">Atiende: ' + horario + '</span>';
+    toast.style.display = 'block';
+    setTimeout(function(){ toast.style.display='none'; }, 4000);
     return;
   }
 
