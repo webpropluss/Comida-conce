@@ -1469,14 +1469,10 @@ function renderGrid(lista){
         }
         <div class="card-badges">
           <span class="cbadge ${n.tipo==='rapida'?'cb-r':n.tipo==='postres'?'cb-pos':'cb-a'}">${n.tipo==='rapida'?'Comida Rápida':n.tipo==='postres'?'Postres & Antojos':'Almuerzo Día'}</span>
-          ${n.premium?'<span class="cbadge cb-p">⭐ Premium</span>':''}
-          ${esDestacado(n.id)?'<span class="cbadge" style="background:#8b5cf6;color:#fff">🔝 Destacado</span>':''}
-          ${esRecomendado(n.id)?'<span class="cbadge" style="background:#f59e0b;color:#fff">👍 Recomendado</span>':''}
-          ${tieneDescuento(n.id)?'<span class="cbadge" style="background:#e11d48;color:#fff">🏷️ -2Bs</span>':''}
-          ${n.socio?'<span class="cbadge" style="background:#f4a261;color:#7a4800">🤝 Socio</span>':''}
-          ${!n.abierto?'<span class="cbadge cb-c">Cerrado</span>':''}
-          ${n._nuevo?'<span class="cbadge cb-new">✨ Nuevo</span>':''}
+          ${esRecomendado(n.id)?'<span class="cbadge" style="background:#f59e0b;color:#fff">👍 Recomendado</span>':''} 
+          ${!n.abierto?'<span class="cbadge cb-c">Cerrado</span>':''} 
         </div>
+        ${tieneDescuento(n.id)?'<div style="position:absolute;bottom:8px;right:8px;background:#e11d48;color:#fff;font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.2)">🏷️ -2Bs</div>':''} 
       </div>
       <div class="card-body">
         <div class="card-nombre">${n.nombre}</div>
@@ -1782,7 +1778,30 @@ function abrirModalCarrito(){
         <span class="m-precio">Bs ${c.precio*c.qty}</span>
       </div>
     </div>`).join('');
-  document.getElementById('modal-total').textContent='Total: Bs '+carrito.reduce((s,c)=>s+c.precio*c.qty,0);
+  // Calcular descuento para mostrar en modal
+  const _negCart = carrito.length ? getTodos().find(function(n){ return n.wsp===carrito[0].wsp; }) : null;
+  const _hoyD = new Date().toISOString().split('T')[0];
+  const _descKey = 'cc_desc_usado_' + (_negCart?_negCart.id:'') + '_' + _hoyD;
+  const _descUsado = localStorage.getItem(_descKey) === '1';
+  const _totalBruto = carrito.reduce(function(s,c){ return s+c.precio*c.qty; }, 0);
+  const _aplicar = _negCart && tieneDescuento(_negCart.id) && _totalBruto >= 20 && !_descUsado;
+  const _total = _aplicar ? _totalBruto - 2 : _totalBruto;
+
+  var modalTotalEl = document.getElementById('modal-total');
+  if(_aplicar){
+    modalTotalEl.innerHTML =
+      '<div style="font-size:.8rem;color:#6b7280;text-decoration:line-through;text-align:right">Bs ' + _totalBruto + '</div>' +
+      '<div style="color:#e11d48;font-size:.75rem;font-weight:700;text-align:right">🏷️ -2Bs descuento aplicado</div>' +
+      '<div style="font-size:1.1rem;font-weight:800;color:var(--verde);text-align:right">Total: Bs ' + _total + '</div>';
+  } else {
+    modalTotalEl.innerHTML = '<div>Total: Bs ' + _totalBruto + '</div>';
+    if(_negCart && tieneDescuento(_negCart.id) && _totalBruto < 20){
+      modalTotalEl.innerHTML += '<div style="font-size:.72rem;color:#e11d48;text-align:right">🏷️ Descuento disponible en pedidos +Bs 20</div>';
+    }
+    if(_negCart && tieneDescuento(_negCart.id) && _descUsado){
+      modalTotalEl.innerHTML += '<div style="font-size:.72rem;color:#6b7280;text-align:right">🏷️ Descuento ya usado hoy</div>';
+    }
+  }
   mostrarModal();
 }
 
