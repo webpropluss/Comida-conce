@@ -1927,7 +1927,12 @@ function enviarWSP(){
   const negActual = carrito.length ? getTodos().find(function(n){ return n.wsp===carrito[0].wsp; }) : null;
   if(negActual && !estaAbierto(negActual)){
     var horario = negActual.horario || '';
-    alert('⏰ Fuera de horario de atención\n\nEste negocio atiende: ' + horario + '\n\nVolvé en su horario para hacer tu pedido.');
+    var avisoEl = document.getElementById('aviso-horario');
+    if(avisoEl){
+      avisoEl.innerHTML = '⏰ <strong>Fuera de horario de atención</strong><br>Este negocio atiende: ' + horario;
+      avisoEl.style.display = 'block';
+      setTimeout(function(){ avisoEl.style.display='none'; }, 4000);
+    }
     return;
   }
 
