@@ -690,12 +690,7 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
         <div id="modal-servicios-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
       </div>
 
-      <!-- Hora de recogida -->
-      <label style="font-size:.82rem;font-weight:600;display:block;margin-top:.7rem;margin-bottom:3px">⏰ Hora</label>
-      <select class="hora-sel" id="hora-recogida"></select>
-      <div id="hora-sin-opciones" style="display:none;background:var(--naranja-bg);border-radius:9px;padding:8px 12px;font-size:.82rem;color:var(--naranja-oscuro);margin-top:5px">
-        ⏰ El negocio está cerrado o ya no acepta pedidos por hoy.
-      </div>
+
     </div>
 
     <!-- BOTÓN FIJO ABAJO -->
@@ -1395,6 +1390,33 @@ function guardarRegistrados(l){
 }
 function getHistorial(){ try{return JSON.parse(localStorage.getItem('cc_historial')||'[]');}catch(e){return[];} }
 function guardarHistorial(l){ localStorage.setItem('cc_historial',JSON.stringify(l)); }
+function estaAbierto(neg){
+  // Si tiene dias especificos (Lun-Vie, etc) verificar dia
+  var ahora = new Date();
+  var diaSemana = ahora.getDay(); // 0=Dom, 1=Lun...6=Sab
+  var horaActual = ahora.getHours() + ahora.getMinutes()/60;
+
+  // Parsear horario: "11:00-14:00" o "Lun-Vie · 11:00-14:00"
+  var horario = neg.horario || '';
+  
+  // Verificar dias si dice Lun-Vie
+  if(horario.indexOf('Lun-Vie') !== -1 || horario.indexOf('Lun-Sáb') !== -1){
+    var esSemana = diaSemana >= 1 && diaSemana <= 5;
+    var esSabado = diaSemana === 6;
+    if(horario.indexOf('Lun-Vie') !== -1 && !esSemana) return false;
+    if(horario.indexOf('Lun-Sáb') !== -1 && !esSemana && !esSabado) return false;
+  }
+
+  // Parsear horas
+  var match = horario.match(/(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})/);
+  if(!match) return true; // sin horario definido = siempre abierto
+  
+  var abre = parseInt(match[1]) + parseInt(match[2])/60;
+  var cierra = parseInt(match[3]) + parseInt(match[4])/60;
+  
+  return horaActual >= abre && horaActual < cierra;
+}
+
 function getTodos(){
   var menus = {};
   try{ menus = JSON.parse(localStorage.getItem('cc_menus')||'{}'); }catch(e){ menus={}; }
@@ -1407,7 +1429,9 @@ function getTodos(){
       var extra = {};
       if(menus[String(n.id)]) extra.menuDia = menus[String(n.id)];
       if(socios[n.id]) extra.socio = true;
-      return Object.assign({}, n, extra);
+      var neg = Object.assign({}, n, extra);
+      neg.abierto = estaAbierto(neg); // calcular dinámicamente
+      return neg;
     });
   var registrados = getRegistrados();
   var todos = [...demos, ...registrados];
@@ -1423,6 +1447,10 @@ function getTodos(){
       return 0;
     });
   }
+  // Recalcular abierto para todos
+  todos = todos.map(function(n){
+    return Object.assign({}, n, {abierto: estaAbierto(n)});
+  });
   return todos;
 }
 
@@ -1469,10 +1497,10 @@ function renderGrid(lista){
         }
         <div class="card-badges">
           <span class="cbadge ${n.tipo==='rapida'?'cb-r':n.tipo==='postres'?'cb-pos':'cb-a'}">${n.tipo==='rapida'?'Comida Rápida':n.tipo==='postres'?'Postres & Antojos':'Almuerzo Día'}</span>
-          ${esRecomendado(n.id)?'<span class="cbadge" style="background:#f59e0b;color:#fff">👍 Recomendado</span>':''} 
+          ${tieneDescuento(n.id)?'<span class="cbadge" style="background:#e11d48;color:#fff">🏷️ -2Bs</span>':''} 
           ${!n.abierto?'<span class="cbadge cb-c">Cerrado</span>':''} 
         </div>
-        ${tieneDescuento(n.id)?'<div style="position:absolute;bottom:8px;right:8px;background:#e11d48;color:#fff;font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.2)">🏷️ -2Bs</div>':''} 
+        ${esRecomendado(n.id)?'<div style="position:absolute;bottom:8px;left:8px;background:#f59e0b;color:#fff;font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.2)">👍 Recomendado</div>':''} 
       </div>
       <div class="card-body">
         <div class="card-nombre">${n.nombre}</div>
@@ -1761,10 +1789,6 @@ function abrirModalCarrito(){
     wrap.style.display='none';
   }
 
-  // Generar horas disponibles según negocio y hora actual
-  const negHoras = carrito.length ? getTodos().find(n=>n.wsp===carrito[0].wsp) : null;
-  generarHorasDisponibles(negHoras);
-
   document.getElementById('modal-items').innerHTML=carrito.map(c=>`
     <div class="modal-item">
       <div style="flex:1;min-width:0">
@@ -1899,11 +1923,12 @@ function cambiarQtyCarrito(id,delta){
 
 function enviarWSP(){
   if(!carrito.length) return;
-  const hora = document.getElementById('hora-recogida').value;
+
   const nombreEl = document.getElementById('nombre-cliente');
   const nombre = nombreEl ? nombreEl.value.trim() : '';
   const wsp = carrito[0].wsp||'59170000000';
   const items = carrito.map(c=>`• ${c.nombre} × ${c.qty} = Bs ${c.precio*c.qty}`).join('\n');
+  const descLinea = '';  // se calcula abajo
   const totalBruto = carrito.reduce((s,c)=>s+c.precio*c.qty,0);
   // Verificar descuento
   const negCarrito = carrito.length ? getTodos().find(n=>n.wsp===carrito[0].wsp) : null;
@@ -1912,6 +1937,7 @@ function enviarWSP(){
   const descUsado = localStorage.getItem(descKey) === '1';
   const aplicarDesc = negCarrito && tieneDescuento(negCarrito.id) && totalBruto >= 20 && !descUsado;
   const total = aplicarDesc ? totalBruto - 2 : totalBruto;
+  const descLineaReal = aplicarDesc ? '\n🏷️ Descuento especial: -Bs 2' : '';
   const nombreLinea = nombre ? `\n👤 Pedido a nombre de: *${nombre}*` : '';
   // Get selected service
   const srvBtns = document.getElementById('modal-servicios-btns');
@@ -1919,7 +1945,7 @@ function enviarWSP(){
   const srvLabels = {recoger:'🏃 Recoger en local', mesa:'🪑 Reserva de mesa', domicilio:'🛵 Envío a domicilio'};
   const srvLinea = srvSel ? `\n🍽️ Servicio: *${srvLabels[srvSel]||srvSel}*` : '';
   const msg = encodeURIComponent(
-    `¡Hola! Quiero hacer un pedido:\n\n${items}${descLinea}\n\n*Total: Bs ${total}*${srvLinea}\n⏰ Hora: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
+    `¡Hola! Quiero hacer un pedido:\n\n${items}${descLineaReal}\n\n*Total: Bs ${total}*${srvLinea}${nombreLinea}\n\n¡Gracias! 😊`
   );
   // Marcar descuento como usado hoy si se aplicó
   if(aplicarDesc && negCarrito){
