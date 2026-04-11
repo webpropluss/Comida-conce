@@ -1056,6 +1056,15 @@ _fbScript.textContent = `
     if(typeof actualizarStats === 'function') actualizarStats();
   });
 
+  // Sincronizar destacados en tiempo real
+  onSnapshot(doc(db, 'config', 'destacados'), function(snap){
+    if(snap.exists() && snap.data().ids){
+      localStorage.setItem('cc_destacados', JSON.stringify(snap.data().ids));
+      if(typeof renderGrid === 'function') renderGrid(getTodos());
+      if(typeof renderAdminTodos === 'function') renderAdminTodos();
+    }
+  });
+
   // Sincronizar socios en tiempo real
   onSnapshot(doc(db, 'config', 'socios'), function(snap){
     if(snap.exists()){
@@ -1383,7 +1392,21 @@ function getTodos(){
       if(socios[n.id]) extra.socio = true;
       return Object.assign({}, n, extra);
     });
-  return [...demos, ...getRegistrados()];
+  var registrados = getRegistrados();
+  var todos = [...demos, ...registrados];
+  // Sort: destacados first
+  var destacados = getDestacados();
+  if(destacados.length > 0){
+    todos.sort(function(a,b){
+      var ai = destacados.indexOf(a.id);
+      var bi = destacados.indexOf(b.id);
+      if(ai!==-1 && bi===-1) return -1;
+      if(ai===-1 && bi!==-1) return 1;
+      if(ai!==-1 && bi!==-1) return ai-bi;
+      return 0;
+    });
+  }
+  return todos;
 }
 
 /* ══════════════════════════════════════════
@@ -1430,6 +1453,7 @@ function renderGrid(lista){
         <div class="card-badges">
           <span class="cbadge ${n.tipo==='rapida'?'cb-r':n.tipo==='postres'?'cb-pos':'cb-a'}">${n.tipo==='rapida'?'Comida Rápida':n.tipo==='postres'?'Postres & Antojos':'Almuerzo Día'}</span>
           ${n.premium?'<span class="cbadge cb-p">⭐ Premium</span>':''}
+          ${esDestacado(n.id)?'<span class="cbadge" style="background:#8b5cf6;color:#fff">🔝 Destacado</span>':''}
           ${n.socio?'<span class="cbadge" style="background:#f4a261;color:#7a4800">🤝 Socio</span>':''}
           ${!n.abierto?'<span class="cbadge cb-c">Cerrado</span>':''}
           ${n._nuevo?'<span class="cbadge cb-new">✨ Nuevo</span>':''}
@@ -2870,6 +2894,30 @@ function renderAdminNuevos(){
 
 // Guardar socios de negocios demo en localStorage separado
 function getSociosDemo(){ try{return JSON.parse(localStorage.getItem('cc_socios_demo')||'{}');}catch(e){return{};} }
+
+function getDestacados(){ try{return JSON.parse(localStorage.getItem('cc_destacados')||'[]');}catch(e){return[];} }
+function guardarDestacados(l){ 
+  localStorage.setItem('cc_destacados',JSON.stringify(l));
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'config','destacados'),{ids:l})
+      .catch(function(e){ console.log('Error guardando destacados:',e); });
+  }
+}
+
+function esDestacado(id){ return getDestacados().includes(id); }
+
+function toggleDestacado(id){
+  var lista = getDestacados();
+  var idx = lista.indexOf(id);
+  if(idx!==-1){
+    lista.splice(idx,1);
+  } else {
+    lista.unshift(id); // poner al inicio
+  }
+  guardarDestacados(lista);
+  renderAdminTodos();
+  renderGrid(getTodos());
+}
 function guardarSociosDemo(obj){ localStorage.setItem('cc_socios_demo',JSON.stringify(obj)); }
 
 function eliminarDemo(id){
@@ -2932,6 +2980,88 @@ function renderAdminNuevos(){
   renderAdminTodos();
 }
 
+function activarManual(id, nombre){
+  var meses = prompt('Activar membresia de ' + nombre + '\n\nCuantos meses activar? (1, 2, 3...)', '1');
+  if(!meses || isNaN(parseInt(meses))) return;
+  var numMeses = parseInt(meses);
+  if(numMeses < 1 || numMeses > 12){ alert('Ingresa un numero entre 1 y 12.'); return; }
+
+  // Calcular fecha de vencimiento
+  var fv = new Date();
+  fv.setMonth(fv.getMonth() + numMeses);
+  var fechaVence = fv.getDate() + '/' + (fv.getMonth()+1) + '/' + fv.getFullYear();
+
+  var datosActivacion = {
+    negId: String(id),
+    nombre: nombre,
+    estado: 'activo_pago',
+    fechaVence: fechaVence,
+    ultimoPago: new Date().toLocaleDateString('es-BO'),
+    activadoPor: 'admin',
+    meses: numMeses
+  };
+
+  // Guardar en Firestore
+  if(window._db && window._fbReady){
+    window._setDoc(window._doc(window._db,'activaciones',String(id)), datosActivacion)
+      .then(function(){
+        // También actualizar en negocios si existe
+        var ref = window._doc(window._db,'negocios',String(id));
+        window._getDoc(ref).then(function(snap){
+          if(snap.exists()){
+            var data = snap.data();
+            data.estado = 'activo_pago';
+            data.fechaVence = fechaVence;
+            window._setDoc(ref, data);
+          }
+        });
+        alert('✅ Membresia de ' + nombre + ' activada hasta ' + fechaVence);
+        renderAdminTodos();
+        renderGrid(getTodos());
+      })
+      .catch(function(e){ alert('Error al activar: ' + e.message); });
+  } else {
+    // Fallback localStorage
+    var acts = {};
+    try{ acts = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+    acts[String(id)] = datosActivacion;
+    localStorage.setItem('cc_activaciones', JSON.stringify(acts));
+    alert('✅ Membresia activada hasta ' + fechaVence + ' (sin conexion Firebase)');
+    renderAdminTodos();
+    renderGrid(getTodos());
+  }
+}
+
+function getEstadoNeg(neg){
+  // Check activaciones from Firestore first
+  var acts = window._activacionesFS || {};
+  if(Object.keys(acts).length===0){
+    try{ acts = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+  }
+  var act = acts[String(neg.id)];
+  if(act && act.estado==='activo_pago'){
+    // Verify not expired
+    var partes = (act.fechaVence||'').split('/');
+    if(partes.length===3){
+      var fv = new Date(parseInt(partes[2]),parseInt(partes[1])-1,parseInt(partes[0]));
+      if(new Date() <= fv) return 'activo';
+    }
+  }
+  if(neg.estado==='activo_pago') return 'activo';
+  return 'prueba';
+}
+
+function getVenceNeg(neg){
+  var acts = window._activacionesFS || {};
+  if(Object.keys(acts).length===0){
+    try{ acts = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+  }
+  var act = acts[String(neg.id)];
+  if(act && act.fechaVence) return act.fechaVence;
+  if(neg.fechaVence) return neg.fechaVence;
+  return '—';
+}
+
 function renderAdminTodos(){
   const tabla = document.getElementById('adm-tabla-todos');
   if(!tabla) return;
@@ -2951,12 +3081,18 @@ function renderAdminTodos(){
         ${esSocio?'<span style="background:#f4a261;color:#7a4800;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:6px;margin-left:3px">SOCIO</span>':''}
       </span>
       <span>${n.tipo==='almuerzo'?'Almuerzo':n.tipo==='postres'?'Postres':'Rápida'}</span>
-      <span class="sbadge ${esSocio?'s-act':vencido?'s-venc':n.estado==='prueba'?'s-pr':'s-act'}">
-        ${esSocio?'⭐ Socio':vencido?'Vencido':n.estado==='prueba'?'Prueba':'Activo'}
+      <span class="sbadge ${esSocio?'s-act':getEstadoNeg(n)==='activo'?'s-act':vencido?'s-venc':'s-pr'}">
+        ${esSocio?'⭐ Socio':getEstadoNeg(n)==='activo'?'✅ Activo · vence '+getVenceNeg(n):vencido?'Vencido':'Prueba · vence '+n.fechaVence}
       </span>
       <div style="display:flex;flex-direction:column;gap:4px">
         <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
-          ${esSocio?'Quitar':'⭐ Socio'}
+          ${esSocio?'Quitar socio':'⭐ Socio'}
+        </button>
+        <button class="btn-sm" style="border-color:#8b5cf6;color:#8b5cf6" onclick="toggleDestacado(${n.id})">
+          ${esDestacado(n.id)?'▼ Quitar top':'▲ Poner 1°'}
+        </button>
+        <button class="btn-sm" style="border-color:#2d6a4f;color:#2d6a4f" onclick="activarManual(${n.id},'${n.nombre}')">
+          ${getEstadoNeg(n)==='activo'?'🔄 Renovar':'✅ Activar'}
         </button>
         <button class="btn-sm rojo" onclick="eliminarDemo(${n.id})">Eliminar</button>
       </div>
@@ -2978,7 +3114,13 @@ function renderAdminTodos(){
       </span>
       <div style="display:flex;flex-direction:column;gap:4px">
         <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
-          ${esSocio?'Quitar':'⭐ Socio'}
+          ${esSocio?'Quitar socio':'⭐ Socio'}
+        </button>
+        <button class="btn-sm" style="border-color:#8b5cf6;color:#8b5cf6" onclick="toggleDestacado(${n.id})">
+          ${esDestacado(n.id)?'▼ Quitar top':'▲ Poner 1°'}
+        </button>
+        <button class="btn-sm" style="border-color:#2d6a4f;color:#2d6a4f" onclick="activarManual(${n.id},'${n.nombre}')">
+          ${getEstadoNeg(n)==='activo'?'🔄 Renovar':'✅ Activar'}
         </button>
         <button class="btn-sm rojo" onclick="eliminarNegocio(${n.id})">Eliminar</button>
       </div>
