@@ -972,7 +972,7 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
           </label>
         </div>
       </div>
-      <div style="font-size:.75rem;color:var(--texto-gris);margin-top:10px;text-align:center">Los QR se guardan localmente. En Firebase estarán en la nube.</div>
+      <div style="font-size:.75rem;color:var(--texto-gris);margin-top:10px;text-align:center">Los QR se guardan en Firebase y son visibles en todos los dispositivos.</div>
     </div>
 
 
@@ -2674,13 +2674,12 @@ function salirAdmin(){
 ══════════════════════════════════════════ */
 function cargarAnalytics(periodo){
   if(!window._db || !window._fbReady){ 
-    document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">⏳ Conectando con Firebase...</div>';
-    // Reintentar en 2 segundos
+    document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">⏳ Conectando...</div>';
     setTimeout(function(){ cargarAnalytics(periodo); }, 2000);
     return; 
   }
-  // Mostrar loading
-  document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">⏳ Cargando datos...</div>';
+  console.log('Cargando analytics para período:', periodo);
+  document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">⏳ Cargando...</div>';
   document.getElementById('stat-pedidos-hoy').textContent = '...';
   document.getElementById('stat-bs-hoy').textContent = '...';
   document.getElementById('stat-visitas-semana').textContent = '...';
@@ -2708,15 +2707,20 @@ function cargarAnalytics(periodo){
   }
 
   // Load pedidos for each date
+  console.log('Fechas a consultar:', fechas);
   var promises = fechas.map(function(fecha){
     return window._getDoc(window._doc(window._db,'analytics','pedidos_'+fecha))
-      .then(function(snap){ return snap.exists() ? snap.data() : null; })
-      .catch(function(){ return null; });
+      .then(function(snap){ 
+        console.log('Pedidos '+fecha+':', snap.exists() ? snap.data() : 'vacío');
+        return snap.exists() ? snap.data() : null; 
+      })
+      .catch(function(e){ console.error('Error leyendo pedidos '+fecha+':', e); return null; });
   });
 
   Promise.all(promises).then(function(results){
     var totalPedidos = 0, totalBs = 0;
     var porNegocio = {};
+    console.log('Resultados pedidos:', results);
 
     results.forEach(function(data){
       if(!data || !data.pedidos) return;
