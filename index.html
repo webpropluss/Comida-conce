@@ -2643,7 +2643,19 @@ function loginAdmin(){
     renderAdminTodos();
     actualizarStats();
     cargarQRsAdmin();
-    setTimeout(function(){ cargarAnalytics('hoy'); }, 1500);
+    // Esperar Firebase antes de cargar analytics
+    var intentosAnalytics = 0;
+    var esperarFirebase = setInterval(function(){
+      intentosAnalytics++;
+      if(window._fbReady){
+        clearInterval(esperarFirebase);
+        cargarAnalytics('hoy');
+      } else if(intentosAnalytics >= 10){ // 5 segundos max
+        clearInterval(esperarFirebase);
+        document.getElementById('pedidos-por-negocio').innerHTML = 
+          '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Sin conexión a Firebase. Recargá la página.</div>';
+      }
+    }, 500);
     // Cargar WSP admin guardado
     const wspGuardado = localStorage.getItem('cc_admin_wsp');
     if(wspGuardado) document.getElementById('admin-wsp-input').value='+'+wspGuardado;
@@ -2662,9 +2674,16 @@ function salirAdmin(){
 ══════════════════════════════════════════ */
 function cargarAnalytics(periodo){
   if(!window._db || !window._fbReady){ 
-    document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Conectando con Firebase...</div>';
+    document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">⏳ Conectando con Firebase...</div>';
+    // Reintentar en 2 segundos
+    setTimeout(function(){ cargarAnalytics(periodo); }, 2000);
     return; 
   }
+  // Mostrar loading
+  document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">⏳ Cargando datos...</div>';
+  document.getElementById('stat-pedidos-hoy').textContent = '...';
+  document.getElementById('stat-bs-hoy').textContent = '...';
+  document.getElementById('stat-visitas-semana').textContent = '...';
 
   // Highlight selected button
   ['hoy','semana','mes'].forEach(function(p){
@@ -2711,15 +2730,13 @@ function cargarAnalytics(periodo){
       });
     });
 
-    // Update stats
-    document.getElementById('stat-pedidos-hoy').textContent = totalPedidos;
-    document.getElementById('stat-bs-hoy').textContent = 'Bs '+totalBs;
-
     // Render por negocio
     var sorted = Object.entries(porNegocio).sort(function(a,b){ return b[1].pedidos-a[1].pedidos; });
     var cont = document.getElementById('pedidos-por-negocio');
+    document.getElementById('stat-pedidos-hoy').textContent = totalPedidos;
+    document.getElementById('stat-bs-hoy').textContent = 'Bs '+totalBs;
     if(sorted.length===0){
-      cont.innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Sin pedidos en este período</div>';
+      cont.innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Sin pedidos registrados aún en este período</div>';
     } else {
       cont.innerHTML = sorted.map(function(entry){
         var neg = entry[0], datos = entry[1];
