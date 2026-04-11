@@ -901,9 +901,41 @@ nav{background:var(--verde);position:sticky;top:0;z-index:100;box-shadow:0 2px 1
     <!-- ESTADÍSTICAS -->
     <div class="admin-stats">
       <div class="astat"><div class="astat-num" id="adm-total">—</div><div class="astat-lbl">Total negocios</div></div>
-      <div class="astat"><div class="astat-num" id="adm-activos">3</div><div class="astat-lbl">Membresías activas</div></div>
-      <div class="astat"><div class="astat-num" id="adm-prueba">2</div><div class="astat-lbl">En período prueba</div></div>
-      <div class="astat"><div class="astat-num">Bs 70</div><div class="astat-lbl">Ingresos/mes</div></div>
+      <div class="astat"><div class="astat-num" id="adm-activos">—</div><div class="astat-lbl">Membresías activas</div></div>
+      <div class="astat"><div class="astat-num" id="adm-visitas-hoy">—</div><div class="astat-lbl">Visitas hoy</div></div>
+      <div class="astat"><div class="astat-num" id="adm-dispositivos-hoy">—</div><div class="astat-lbl">Dispositivos únicos hoy</div></div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="admin-section-title">📊 Estadísticas de hoy</div>
+    <div style="background:var(--blanco);border-radius:13px;box-shadow:var(--sombra);padding:13px;margin-bottom:1.4rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px">
+        <div style="text-align:center;background:var(--verde-bg);border-radius:10px;padding:10px">
+          <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:var(--verde)" id="stat-pedidos-hoy">—</div>
+          <div style="font-size:.68rem;color:var(--texto-gris);font-weight:600;text-transform:uppercase">Pedidos hoy</div>
+        </div>
+        <div style="text-align:center;background:var(--naranja-bg);border-radius:10px;padding:10px">
+          <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:var(--naranja-oscuro)" id="stat-bs-hoy">—</div>
+          <div style="font-size:.68rem;color:var(--texto-gris);font-weight:600;text-transform:uppercase">Bs movidos hoy</div>
+        </div>
+        <div style="text-align:center;background:#fef9c3;border-radius:10px;padding:10px">
+          <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:900;color:#713f12" id="stat-visitas-semana">—</div>
+          <div style="font-size:.68rem;color:var(--texto-gris);font-weight:600;text-transform:uppercase">Visitas 7 días</div>
+        </div>
+      </div>
+
+      <!-- Pedidos por negocio hoy -->
+      <div style="font-size:.8rem;font-weight:700;color:var(--verde);margin-bottom:7px">Pedidos por negocio hoy</div>
+      <div id="pedidos-por-negocio">
+        <div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Cargando datos...</div>
+      </div>
+
+      <!-- Botones de período -->
+      <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+        <button onclick="cargarAnalytics('hoy')" id="btn-hoy" style="background:var(--verde);color:#fff;border:none;padding:5px 12px;border-radius:16px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit">Hoy</button>
+        <button onclick="cargarAnalytics('semana')" id="btn-semana" style="background:#fff;border:1.5px solid var(--borde);color:var(--texto-gris);padding:5px 12px;border-radius:16px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">7 días</button>
+        <button onclick="cargarAnalytics('mes')" id="btn-mes" style="background:#fff;border:1.5px solid var(--borde);color:var(--texto-gris);padding:5px 12px;border-radius:16px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">30 días</button>
+      </div>
     </div>
 
     <!-- TODOS LOS NEGOCIOS -->
@@ -996,6 +1028,28 @@ _fbScript.textContent = `
   window._getDoc = getDoc;
   console.log('Firebase listo');
 
+  // ── REGISTRAR VISITA ──
+  (function(){
+    var hoy = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    var visitaRef = doc(db, 'analytics', 'visitas_' + hoy);
+    // Usar un ID único por dispositivo (session)
+    var deviceId = localStorage.getItem('cc_device_id');
+    if(!deviceId){
+      deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      localStorage.setItem('cc_device_id', deviceId);
+    }
+    // Incrementar visita del día
+    getDoc(visitaRef).then(function(snap){
+      var data = snap.exists() ? snap.data() : {fecha: hoy, total: 0, dispositivos: []};
+      if(!data.dispositivos) data.dispositivos = [];
+      var esNuevo = !data.dispositivos.includes(deviceId);
+      data.total = (data.total||0) + 1;
+      if(esNuevo) data.dispositivos.push(deviceId);
+      data.dispositivos_unicos = data.dispositivos.length;
+      setDoc(visitaRef, data).catch(function(e){ console.log('Error analytics:', e); });
+    }).catch(function(e){ console.log('Analytics offline:', e); });
+  })();
+
   // Cargar QRs desde Firestore
   getDoc(doc(db, 'config', 'qrs')).then(function(snap){
     if(snap.exists()){
@@ -1017,14 +1071,16 @@ _fbScript.textContent = `
     }
   });
 
-  // Cargar activaciones de demos desde Firestore
+  // Sincronizar activaciones en tiempo real
   onSnapshot(collection(db, 'activaciones'), function(snap){
     var acts = {};
-    try{ acts = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
     snap.forEach(function(d){ acts[d.id] = d.data(); });
+    window._activacionesFS = acts; // cache en memoria
     localStorage.setItem('cc_activaciones', JSON.stringify(acts));
+    console.log('Activaciones sincronizadas:', Object.keys(acts));
     if(typeof renderGrid === 'function') renderGrid(getTodos());
     if(typeof renderAdminTodos === 'function') renderAdminTodos();
+    if(typeof actualizarStats === 'function') actualizarStats();
   });
 
   // Sincronizar socios en tiempo real
@@ -1823,6 +1879,30 @@ function enviarWSP(){
     `¡Hola! Quiero hacer un pedido:\n\n${items}\n\n*Total: Bs ${total}*${srvLinea}\n⏰ Hora: *${hora}*${nombreLinea}\n\n¡Gracias! 😊`
   );
   window.open(`https://wa.me/${wsp}?text=${msg}`,'_blank');
+
+  // ── REGISTRAR PEDIDO EN ANALYTICS ──
+  if(window._db && window._fbReady && carrito.length > 0){
+    var hoy = new Date().toISOString().split('T')[0];
+    var negNombre = carrito[0].negocio || 'Desconocido';
+    var negWsp = carrito[0].wsp || '';
+    var totalPedido = carrito.reduce(function(s,c){ return s+c.precio*c.qty; }, 0);
+    var pedidoRef = window._doc(window._db, 'analytics', 'pedidos_' + hoy);
+    window._getDoc(pedidoRef).then(function(snap){
+      var data = snap.exists() ? snap.data() : {fecha: hoy, pedidos: [], total_pedidos: 0, total_bs: 0};
+      if(!data.pedidos) data.pedidos = [];
+      data.pedidos.push({
+        negocio: negNombre,
+        wsp: negWsp,
+        monto: totalPedido,
+        hora: new Date().toLocaleTimeString('es-BO', {hour:'2-digit', minute:'2-digit'}),
+        items: carrito.length
+      });
+      data.total_pedidos = data.pedidos.length;
+      data.total_bs = data.pedidos.reduce(function(s,p){ return s+p.monto; }, 0);
+      window._setDoc(pedidoRef, data).catch(function(e){ console.log('Error pedido analytics:', e); });
+    }).catch(function(e){ console.log('Analytics pedido offline:', e); });
+  }
+
   // Limpiar carrito después de enviar
   carrito=[];
   updateCarrito();
@@ -1985,24 +2065,41 @@ function loginNegocio(){
   }
   error.style.display='none';
   claveInput.value='';
+  negSesion = neg;
 
-  // Verificar si está vencido
-  if(estaVencido(neg)){
-    negSesion = neg;
-    // Cerrar el panel de menudia y mostrar pantalla de pago
-    document.getElementById('menudia-login').style.display='block';
-    document.getElementById('menudia-form').style.display='none';
-    mostrarPago(neg);
-    return;
-  }
-
-  negSesion=neg;
+  // Mostrar loading mientras verifica con Firebase
   document.getElementById('menudia-login').style.display='none';
   document.getElementById('menudia-form').style.display='block';
-  document.getElementById('neg-sesion-nombre').textContent=neg.nombre;
-  poblarSelectMenu();
-  // Mostrar formulario correcto según tipo
-  adaptarFormulario(neg.tipo);
+  document.getElementById('neg-sesion-nombre').textContent = neg.nombre + ' ⏳';
+  document.getElementById('menudia-form').style.opacity = '0.5';
+  document.getElementById('menudia-form').style.pointerEvents = 'none';
+
+  // Esperar que Firebase cargue los datos (máx 3 segundos)
+  var intentos = 0;
+  var verificar = setInterval(function(){
+    intentos++;
+    var fbListo = window._fbReady && window._activacionesFS !== undefined;
+    
+    if(fbListo || intentos >= 6){ // 6 x 500ms = 3 segundos
+      clearInterval(verificar);
+      document.getElementById('neg-sesion-nombre').textContent = neg.nombre;
+      document.getElementById('menudia-form').style.opacity = '';
+      document.getElementById('menudia-form').style.pointerEvents = '';
+
+      if(estaVencido(neg)){
+        negSesion = neg;
+        document.getElementById('menudia-login').style.display='block';
+        document.getElementById('menudia-form').style.display='none';
+        mostrarPago(neg);
+        return;
+      }
+
+      document.getElementById('menudia-login').style.display='none';
+      document.getElementById('menudia-form').style.display='block';
+      poblarSelectMenu();
+      adaptarFormulario(neg.tipo);
+    }
+  }, 500);
 }
 
 function adaptarFormulario(tipo){
@@ -2546,6 +2643,7 @@ function loginAdmin(){
     renderAdminTodos();
     actualizarStats();
     cargarQRsAdmin();
+    setTimeout(function(){ cargarAnalytics('hoy'); }, 1500);
     // Cargar WSP admin guardado
     const wspGuardado = localStorage.getItem('cc_admin_wsp');
     if(wspGuardado) document.getElementById('admin-wsp-input').value='+'+wspGuardado;
@@ -2557,6 +2655,109 @@ function loginAdmin(){
 function salirAdmin(){
   document.getElementById('app-admin').classList.add('hidden');
   document.getElementById('app-cliente').classList.remove('hidden');
+}
+
+/* ══════════════════════════════════════════
+   ANALYTICS
+══════════════════════════════════════════ */
+function cargarAnalytics(periodo){
+  if(!window._db || !window._fbReady){ 
+    document.getElementById('pedidos-por-negocio').innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Conectando con Firebase...</div>';
+    return; 
+  }
+
+  // Highlight selected button
+  ['hoy','semana','mes'].forEach(function(p){
+    var btn = document.getElementById('btn-'+p);
+    if(btn){ btn.style.background = p===periodo ? 'var(--verde)' : '#fff'; btn.style.color = p===periodo ? '#fff' : 'var(--texto-gris)'; }
+  });
+
+  var hoy = new Date().toISOString().split('T')[0];
+  var fechas = [];
+  if(periodo==='hoy'){
+    fechas = [hoy];
+  } else if(periodo==='semana'){
+    for(var i=0;i<7;i++){
+      var d = new Date(); d.setDate(d.getDate()-i);
+      fechas.push(d.toISOString().split('T')[0]);
+    }
+  } else {
+    for(var i=0;i<30;i++){
+      var d = new Date(); d.setDate(d.getDate()-i);
+      fechas.push(d.toISOString().split('T')[0]);
+    }
+  }
+
+  // Load pedidos for each date
+  var promises = fechas.map(function(fecha){
+    return window._getDoc(window._doc(window._db,'analytics','pedidos_'+fecha))
+      .then(function(snap){ return snap.exists() ? snap.data() : null; })
+      .catch(function(){ return null; });
+  });
+
+  Promise.all(promises).then(function(results){
+    var totalPedidos = 0, totalBs = 0;
+    var porNegocio = {};
+
+    results.forEach(function(data){
+      if(!data || !data.pedidos) return;
+      data.pedidos.forEach(function(p){
+        totalPedidos++;
+        totalBs += p.monto || 0;
+        var neg = p.negocio || 'Desconocido';
+        if(!porNegocio[neg]) porNegocio[neg] = {pedidos:0, monto:0};
+        porNegocio[neg].pedidos++;
+        porNegocio[neg].monto += p.monto || 0;
+      });
+    });
+
+    // Update stats
+    document.getElementById('stat-pedidos-hoy').textContent = totalPedidos;
+    document.getElementById('stat-bs-hoy').textContent = 'Bs '+totalBs;
+
+    // Render por negocio
+    var sorted = Object.entries(porNegocio).sort(function(a,b){ return b[1].pedidos-a[1].pedidos; });
+    var cont = document.getElementById('pedidos-por-negocio');
+    if(sorted.length===0){
+      cont.innerHTML = '<div style="font-size:.8rem;color:var(--texto-gris);text-align:center;padding:8px">Sin pedidos en este período</div>';
+    } else {
+      cont.innerHTML = sorted.map(function(entry){
+        var neg = entry[0], datos = entry[1];
+        var pct = totalPedidos > 0 ? Math.round(datos.pedidos/totalPedidos*100) : 0;
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--borde)">' +
+          '<div><div style="font-size:.84rem;font-weight:600">'+neg+'</div>' +
+          '<div style="font-size:.72rem;color:var(--texto-gris)">Bs '+datos.monto+' generados</div></div>' +
+          '<div style="text-align:right">' +
+          '<div style="font-family:Fraunces,serif;font-size:1.1rem;font-weight:900;color:var(--verde)">'+datos.pedidos+'</div>' +
+          '<div style="font-size:.7rem;color:var(--texto-gris)">pedidos ('+pct+'%)</div></div>' +
+          '</div>';
+      }).join('');
+    }
+  });
+
+  // Load visitas
+  var visitasPromises = fechas.map(function(fecha){
+    return window._getDoc(window._doc(window._db,'analytics','visitas_'+fecha))
+      .then(function(snap){ return snap.exists() ? snap.data() : null; })
+      .catch(function(){ return null; });
+  });
+
+  Promise.all(visitasPromises).then(function(results){
+    var totalVisitas = 0, dispositivosUnicos = new Set();
+    results.forEach(function(data){
+      if(!data) return;
+      totalVisitas += data.total || 0;
+      if(data.dispositivos) data.dispositivos.forEach(function(d){ dispositivosUnicos.add(d); });
+    });
+    var elHoy = document.getElementById('adm-visitas-hoy');
+    var elDev = document.getElementById('adm-dispositivos-hoy');
+    var elSem = document.getElementById('stat-visitas-semana');
+    if(periodo==='hoy'){
+      if(elHoy) elHoy.textContent = totalVisitas;
+      if(elDev) elDev.textContent = dispositivosUnicos.size;
+    }
+    if(elSem) elSem.textContent = dispositivosUnicos.size;
+  });
 }
 
 function guardarAdminWSP(){
@@ -2835,16 +3036,18 @@ function estaVencido(neg){
   if(neg.estado==='socio' || neg.socio) return false;
   const sociosDemo = getSociosDemo();
   if(sociosDemo[neg.id]) return false;
-  // Verificar si fue activado via pago (demos o desde otro dispositivo)
-  var activaciones = {};
-  try{ activaciones = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
-  if(activaciones[String(neg.id)]){
-    var act = activaciones[String(neg.id)];
-    // Parsear fecha de vencimiento de la activación
+  // Verificar activación desde Firestore (en memoria o localStorage)
+  var activaciones = window._activacionesFS || {};
+  if(Object.keys(activaciones).length === 0){
+    try{ activaciones = JSON.parse(localStorage.getItem('cc_activaciones')||'{}'); }catch(e){}
+  }
+  var act = activaciones[String(neg.id)];
+  if(act && act.estado === 'activo_pago'){
+    // Verificar que no haya vencido la membresía pagada
     var partes2 = (act.fechaVence||'').split('/');
     if(partes2.length===3){
       var fv2 = new Date(parseInt(partes2[2]), parseInt(partes2[1])-1, parseInt(partes2[0]));
-      if(new Date() <= fv2) return false; // aún activo
+      if(new Date() <= fv2) return false; // activo
     }
   }
   // Parsear fecha boliviana dd/mm/yyyy
@@ -2973,30 +3176,33 @@ function activarConComprobante(){
   const negId = String(negPagando.id);
   const nuevaFechaVence_str = nuevaFechaVence;
   const datosActivacion = {
+    negId: String(negPagando.id),
+    nombre: negPagando.nombre,
+    wsp: negPagando.wsp,
     estado: 'activo_pago',
     fechaVence: nuevaFechaVence_str,
     ultimoPago: new Date().toLocaleDateString('es-BO'),
-    planPago: planPagoSeleccionado
+    planPago: planPagoSeleccionado,
+    plan: planLabel,
+    monto: monto
   };
 
   // 1. Intentar activar en Firestore (negocios registrados)
   if(window._db && window._fbReady){
+    // Guardar en colección 'activaciones' siempre (funciona para demos y registrados)
+    window._setDoc(window._doc(window._db,'activaciones',negId), datosActivacion)
+      .then(function(){ console.log('✅ Activación guardada en Firestore para ID:', negId); })
+      .catch(function(e){ console.error('❌ Error guardando activación:', e); });
+
+    // También actualizar el negocio registrado si existe
     var ref = window._doc(window._db,'negocios',negId);
     window._getDoc(ref).then(function(snap){
       if(snap.exists()){
-        // Negocio registrado en Firestore
         var data = snap.data();
-        Object.assign(data, datosActivacion);
-        window._setDoc(ref, data)
-          .then(function(){ console.log('Membresía activada en Firestore'); })
-          .catch(function(e){ console.error('Error Firestore:', e); });
-      } else {
-        // Negocio demo - guardar activación en colección 'activaciones'
-        window._setDoc(window._doc(window._db,'activaciones',negId), {
-          negId: negId,
-          nombre: negPagando.nombre,
-          ...datosActivacion
-        }).then(function(){ console.log('Activación demo guardada en Firestore'); });
+        data.estado = 'activo_pago';
+        data.fechaVence = nuevaFechaVence_str;
+        data.ultimoPago = datosActivacion.ultimoPago;
+        window._setDoc(ref, data).catch(function(e){ console.error('Error actualizando negocio:', e); });
       }
     });
   }
