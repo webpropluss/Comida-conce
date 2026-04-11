@@ -3149,7 +3149,7 @@ function renderAdminTodos(){
       </span>
       <span>${n.tipo==='almuerzo'?'Almuerzo':n.tipo==='postres'?'Postres':'Rápida'}</span>
       <span class="sbadge ${esSocio?'s-act':getEstadoNeg(n)==='activo'?'s-act':vencido?'s-venc':'s-pr'}">
-        ${esSocio?'⭐ Socio':getEstadoNeg(n)==='activo'?'✅ Activo · vence '+getVenceNeg(n):vencido?'Vencido':'Prueba · vence '+n.fechaVence}
+        ${esSocio?'⭐ Socio':getEstadoNeg(n)==='activo'?'✅ Activo · vence '+getVenceNeg(n):vencido?'Vencido':n.fechaVence?'Prueba · vence '+n.fechaVence:'Activo'}
       </span>
       <div style="display:flex;flex-direction:column;gap:4px">
         <button class="btn-sm ${esSocio?'rojo':'verde'}" onclick="toggleSocio(${n.id})">
